@@ -54,10 +54,10 @@ function render() {
     ? rows
         .map(
           (r, i) =>
-            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : ""}` : `<input class="line-search" data-i="${i}" placeholder="Search item or description">`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td><input class="price-input" data-field="selling_price" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.selling_price || 0)}"></td><td class="cost"><input class="price-input" data-field="internal_cost" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.internal_cost || 0)}"></td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
+            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : ""}` : `<input class="line-search" data-i="${i}" placeholder="Search item or description">`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td><select class="unit-input" data-i="${i}"><option ${r.unit_of_measure === "Each" ? "selected" : ""}>Each</option><option ${r.unit_of_measure === "Metre" ? "selected" : ""}>Metre</option><option ${r.unit_of_measure === "Roll" ? "selected" : ""}>Roll</option><option ${r.unit_of_measure === "Day" ? "selected" : ""}>Day</option><option ${r.unit_of_measure === "Month" ? "selected" : ""}>Month</option><option ${r.unit_of_measure === "Job" ? "selected" : ""}>Job</option><option ${r.unit_of_measure === "Set" ? "selected" : ""}>Set</option></select></td><td><input class="price-input" data-field="selling_price" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.selling_price || 0)}"></td><td class="cost"><input class="price-input" data-field="internal_cost" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.internal_cost || 0)}"></td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
         )
         .join("")
-    : '<tr><td colspan="6" class="empty">No items added yet. Click “Add another item or service”.</td></tr>';
+    : '<tr><td colspan="7" class="empty">No items added yet. Click “Add another item or service”.</td></tr>';
   lines.querySelectorAll(".qty").forEach(
     (e) =>
       (e.onchange = () => {
@@ -69,6 +69,11 @@ function render() {
     e.addEventListener("change", () => {
       rows[e.dataset.i][e.dataset.field] = Number(e.value) || 0;
       render();
+    }),
+  );
+  lines.querySelectorAll(".unit-input").forEach((e) =>
+    e.addEventListener("change", () => {
+      rows[e.dataset.i].unit_of_measure = e.value;
     }),
   );
   lines.querySelectorAll("[data-remove]").forEach(
@@ -114,9 +119,33 @@ function updateSummary() {
   if (t) t.textContent = money(s + c);
 }
 function addLine() {
-  rows.push({ quantity: 1 });
+  rows.push({ quantity: 1, unit_of_measure: "Each" });
   render();
   lines.querySelector(".line-search:last-of-type")?.focus();
+}
+function previewCustomerCopy() {
+  const customer =
+    selectedCustomer?.name ||
+    document.getElementById("customer-search")?.value ||
+    "Customer";
+  const number = document.querySelector("#quote-number")?.value || "Quotation";
+  const date = document.querySelectorAll(".quote-meta input")[2]?.value || "";
+  const total =
+    rows.reduce(
+      (s, r) => s + Number(r.quantity || 1) * Number(r.selling_price || 0),
+      0,
+    ) + additionalCosts.reduce((s, c) => s + Number(c.amount || 0), 0);
+  const popup = window.open(
+    "",
+    "terci-customer-preview",
+    "width=900,height=700",
+  );
+  if (!popup)
+    return alert("Please allow pop-ups to preview the customer copy.");
+  popup.document.write(
+    `<html><head><title>${number}</title><style>body{font:14px Arial;color:#17343b;padding:40px}h1{color:#ed1b2f}table{width:100%;border-collapse:collapse;margin-top:28px}th,td{padding:12px;border-bottom:1px solid #ddd;text-align:left}th{background:#edf4f2}.total{font-size:20px;font-weight:bold;text-align:right;margin-top:25px}</style></head><body><h1>Terci Communications Limited</h1><h2>Quotation ${number}</h2><p><b>Customer:</b> ${customer}<br><b>Date:</b> ${date}</p><table><thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.name || r.description || "Item"}<br><small>${r.description || ""}</small></td><td>${r.quantity || 1}</td><td>${r.unit_of_measure || "Each"}</td><td>${money(r.selling_price)}</td><td>${money((r.quantity || 1) * Number(r.selling_price || 0))}</td></tr>`).join("")}</tbody></table><div class="total">Total: ${money(total)}</div><p>Thank you for your business.</p></body></html>`,
+  );
+  popup.document.close();
 }
 function addAdditionalCost() {
   const d = prompt("Additional cost description");

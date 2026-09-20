@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS quotation_lines (
   item_id INTEGER,
   description TEXT NOT NULL,
   quantity REAL NOT NULL DEFAULT 1,
+  unit_of_measure TEXT NOT NULL DEFAULT 'Each',
   selling_price REAL NOT NULL DEFAULT 0,
   internal_cost REAL NOT NULL DEFAULT 0,
   profit REAL NOT NULL DEFAULT 0,

@@ -147,7 +147,8 @@ button {
   max-width: 1320px;
 }
 .price-input,
-.qty {
+.qty,
+.unit-input {
   width: 100%;
   min-width: 70px;
   border: 1px solid var(--line);
@@ -167,7 +168,9 @@ button {
   padding: 16px;
   font-size: 13px;
 }
-.quote-summary h2 { font-size: 18px; }
+.quote-summary h2 {
+  font-size: 18px;
+}
 .panel-head {
   display: flex;
   justify-content: space-between;
@@ -680,18 +683,79 @@ th {
   }
 }
 
-.quote-nav { display: flex; justify-content: space-between; align-items: center; }
-.quote-nav span { font-size: 20px; line-height: 1; }
-.quote-list-content { max-width: none !important; display: block !important; padding: 0 !important; }
-.quote-list-panel { border: 0; border-radius: 0; min-height: calc(100vh - 88px); padding: 0; }
-.quote-list-toolbar { display: flex; align-items: center; gap: 14px; padding: 16px 28px; border-bottom: 1px solid var(--line); }
-.quote-list-toolbar input { flex: 1; max-width: 430px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
-.toolbar-filter { color: #2474d8; font-size: 20px; }
-.quote-list-table th, .quote-list-table td { padding: 14px 18px; white-space: nowrap; }
-.quote-list-table th { text-transform: uppercase; letter-spacing: .4px; }
-.quote-list-table a { color: #1464d2; font-weight: 700; text-decoration: none; }
-.quote-status { color: #6c7c80; font-size: 12px; font-weight: 700; }
-.quote-status.invoiced, .quote-status.sent { color: #0b9f78; }
-.quote-status.expired { color: var(--red); }
-.title-chevron { color: #1464d2; font-size: 22px; }
-@media(max-width:900px){.quote-list-table{min-width:900px}.quote-list-panel .table-wrap{overflow:auto}}
+.quote-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.quote-nav span {
+  font-size: 20px;
+  line-height: 1;
+}
+.quote-list-content {
+  max-width: none !important;
+  display: block !important;
+  padding: 0 !important;
+}
+.quote-list-panel {
+  border: 0;
+  border-radius: 0;
+  min-height: calc(100vh - 88px);
+  padding: 0;
+}
+.quote-list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--line);
+}
+.quote-list-toolbar input {
+  flex: 1;
+  max-width: 430px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.toolbar-filter {
+  color: #2474d8;
+  font-size: 20px;
+}
+.quote-list-table th,
+.quote-list-table td {
+  padding: 14px 18px;
+  white-space: nowrap;
+}
+.quote-list-table th {
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.quote-list-table a {
+  color: #1464d2;
+  font-weight: 700;
+  text-decoration: none;
+}
+.quote-status {
+  color: #6c7c80;
+  font-size: 12px;
+  font-weight: 700;
+}
+.quote-status.invoiced,
+.quote-status.sent {
+  color: #0b9f78;
+}
+.quote-status.expired {
+  color: var(--red);
+}
+.title-chevron {
+  color: #1464d2;
+  font-size: 22px;
+}
+@media (max-width: 900px) {
+  .quote-list-table {
+    min-width: 900px;
+  }
+  .quote-list-panel .table-wrap {
+    overflow: auto;
+  }
+}

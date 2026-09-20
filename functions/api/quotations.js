@@ -91,13 +91,14 @@ export async function onRequestPost({ env, request }) {
     const id = r.meta.last_row_id;
     for (const l of lines)
       await env.DB.prepare(
-        "INSERT INTO quotation_lines (quotation_id,item_id,description,quantity,selling_price,internal_cost,profit) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO quotation_lines (quotation_id,item_id,description,quantity,unit_of_measure,selling_price,internal_cost,profit) VALUES (?,?,?,?,?,?,?,?)",
       )
         .bind(
           id,
           l.item_id || null,
           l.description || "Item",
           Number(l.quantity || 1),
+          l.unit_of_measure || "Each",
           Number(l.selling_price || 0),
           Number(l.internal_cost || 0),
           Number(l.quantity || 1) *
