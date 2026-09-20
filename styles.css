@@ -142,10 +142,32 @@ button {
 }
 .content:has(.quotation-editor) {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 2.35fr) minmax(245px, 0.75fr);
+  gap: 18px;
   max-width: 1320px;
 }
+.price-input,
+.qty {
+  width: 100%;
+  min-width: 70px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 7px;
+  background: #fff;
+  color: var(--navy);
+}
+.line-description {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.quote-summary {
+  padding: 16px;
+  font-size: 13px;
+}
+.quote-summary h2 { font-size: 18px; }
 .panel-head {
   display: flex;
   justify-content: space-between;

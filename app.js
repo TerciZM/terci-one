@@ -54,16 +54,22 @@ function render() {
     ? rows
         .map(
           (r, i) =>
-            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : " "}` : `<input class="line-search" data-i="${i}" placeholder="Search item or description">`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td>${money(r.selling_price)}</td><td class="cost">${money(r.internal_cost)}</td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
+            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : ""}` : `<input class="line-search" data-i="${i}" placeholder="Search item or description">`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td><input class="price-input" data-field="selling_price" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.selling_price || 0)}"></td><td class="cost"><input class="price-input" data-field="internal_cost" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.internal_cost || 0)}"></td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
         )
         .join("")
-    : '<tr><td colspan="5" class="empty">No items added yet. Click “Add another item or service”.</td></tr>';
+    : '<tr><td colspan="6" class="empty">No items added yet. Click “Add another item or service”.</td></tr>';
   lines.querySelectorAll(".qty").forEach(
     (e) =>
       (e.onchange = () => {
         rows[e.dataset.i].quantity = Number(e.value) || 1;
         render();
       }),
+  );
+  lines.querySelectorAll(".price-input").forEach((e) =>
+    e.addEventListener("change", () => {
+      rows[e.dataset.i][e.dataset.field] = Number(e.value) || 0;
+      render();
+    }),
   );
   lines.querySelectorAll("[data-remove]").forEach(
     (e) =>
