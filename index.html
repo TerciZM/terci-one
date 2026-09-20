@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terci One</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">T</div><div><strong>Terci One</strong><small>Business platform</small></div></div>
+      <nav>
+        <a class="active" href="#dashboard">Dashboard</a>
+        <a href="#quotations">Quotations</a>
+        <a href="#customers">Customers</a>
+        <a href="#items">Items & inventory</a>
+        <a href="#purchasing">Purchasing</a>
+        <a href="#reports">Reports</a>
+      </nav>
+      <div class="sidebar-footer">Terci Communications Limited</div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><span class="eyebrow">TERCI ONE</span><h1>Business workspace</h1></div><button class="user">TC <span>Terence Chilima</span>⌄</button></header>
+      <section id="dashboard" class="content">
+        <div class="welcome"><div><h2>Good day, Terence</h2><p>Manage your business from one connected workspace.</p></div><button class="primary" onclick="document.querySelector('#quotation').scrollIntoView({behavior:'smooth'})">＋ New quotation</button></div>
+        <div class="stats"><div><span>Open quotations</span><strong>0</strong><small>Ready for follow-up</small></div><div><span>Customers</span><strong>0</strong><small>Your customer records</small></div><div><span>Items in storage</span><strong>0</strong><small>Products and services</small></div><div><span>Estimated profit</span><strong>K0.00</strong><small>This month</small></div></div>
+        <section id="quotation" class="panel">
+          <div class="panel-head"><div><span class="eyebrow">QUOTATIONS</span><h2>Create quotation</h2><p>Prepare a customer quote while protecting internal cost information.</p></div><div class="validity"><label>Validity</label><select><option>30 days</option><option>60 days</option><option>90 days</option></select></div></div>
+          <div class="form-grid">
+            <label>Customer<input placeholder="Search customer name"></label>
+            <label>Quote number<input value="QT-2026-0001"></label>
+            <label>Quote date<input type="date"></label>
+          </div>
+          <div class="items-head"><div><h3>Quotation items</h3><p>Items will be connected to Terci One storage.</p></div><button class="secondary" onclick="addLine()">＋ Add item</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Selling price</th><th class="cost">Internal cost</th><th class="profit">Profit</th></tr></thead><tbody id="lines"><tr><td colspan="5" class="empty">No items added yet.</td></tr></tbody></table></div>
+          <div class="quote-actions"><button class="primary" onclick="alert('Quotation saved')">Save quotation</button><button class="secondary" onclick="alert('Customer preview coming next')">Preview customer copy</button></div>
+        </section>
+        <section class="module-grid"><div class="module"><span>Inventory</span><strong>Connect items from storage</strong><p>Track products, purchase costs and selling prices.</p><a href="#items">Open module →</a></div><div class="module"><span>Purchasing</span><strong>Capture every business cost</strong><p>Record supplier purchases and additional quotation expenses.</p><a href="#purchasing">Open module →</a></div><div class="module"><span>Reports</span><strong>See your business clearly</strong><p>Review sales, costs, profit and outstanding quotations.</p><a href="#reports">Open module →</a></div></section>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
