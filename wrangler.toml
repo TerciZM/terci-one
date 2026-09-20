@@ -1,7 +1,8 @@
 name = "terci-one"
 compatibility_date = "2026-09-20"
 pages_build_output_dir = "."
+
 [[d1_databases]]
 binding = "DB"
 database_name = "terci-one-db"
-database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+database_id = "2f31c817-5888-4def-8829-218a17b9c741"
