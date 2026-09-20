@@ -187,9 +187,11 @@ if (document.querySelector(".quote-meta input[type=date]"))
     new Date();
 const quoteNumber = document.getElementById("quote-number");
 if (quoteNumber && !quoteNumber.value) {
-  const year = new Date().getFullYear();
-  const uniquePart = String(Date.now()).slice(-6);
-  quoteNumber.value = `QT-${year}-${uniquePart}`;
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  quoteNumber.value = `QT-${yy}${mm}${dd}001`;
 }
 render();
 const recent = document.querySelector(".recent-quotes tbody");

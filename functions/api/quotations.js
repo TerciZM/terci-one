@@ -23,17 +23,18 @@ export async function onRequestPost({ env, request }) {
           .first()
       : null;
     if (!quoteNumber || duplicate) {
-      const year = String(b.quote_date).slice(0, 4);
-      const prefix = `QT-${year}-`;
-      const latest = await env.DB.prepare(
-        "SELECT quote_number FROM quotations WHERE quote_number LIKE ? ORDER BY id DESC LIMIT 1",
+      const date = String(b.quote_date).replace(/-/g, "");
+      const prefix = `QT-${date.slice(2, 8)}`;
+      const existing = await env.DB.prepare(
+        "SELECT quote_number FROM quotations WHERE quote_number LIKE ?",
       )
         .bind(`${prefix}%`)
-        .first();
-      const next = latest?.quote_number?.match(/(\\d+)$/)?.[1]
-        ? Number(latest.quote_number.match(/(\\d+)$/)[1]) + 1
-        : 1;
-      quoteNumber = `${prefix}${String(next).padStart(4, "0")}`;
+        .all();
+      const highest = (existing.results || []).reduce((max, row) => {
+        const match = String(row.quote_number || "").match(/(\\d{3})$/);
+        return match ? Math.max(max, Number(match[1])) : max;
+      }, 0);
+      quoteNumber = `${prefix}${String(highest + 1).padStart(3, "0")}`;
     }
     const subtotal = lines.reduce(
       (s, l) => s + Number(l.quantity || 1) * Number(l.selling_price || 0),
