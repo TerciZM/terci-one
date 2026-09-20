@@ -185,6 +185,12 @@ document
 if (document.querySelector(".quote-meta input[type=date]"))
   document.querySelector(".quote-meta input[type=date]").valueAsDate =
     new Date();
+const quoteNumber = document.getElementById("quote-number");
+if (quoteNumber && !quoteNumber.value) {
+  const year = new Date().getFullYear();
+  const uniquePart = String(Date.now()).slice(-6);
+  quoteNumber.value = `QT-${year}-${uniquePart}`;
+}
 render();
 const recent = document.querySelector(".recent-quotes tbody");
 if (recent)
