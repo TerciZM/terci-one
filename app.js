@@ -149,7 +149,7 @@ async function saveQuotation() {
     }),
     x = await r.json();
   if (!r.ok) return alert(x.error || "Could not save quotation");
-  alert(`Quotation saved: ${n}`);
+  alert(`Quotation saved: ${x.quote_number || n}`);
 }
 const ci = document.getElementById("customer-search");
 if (ci)
