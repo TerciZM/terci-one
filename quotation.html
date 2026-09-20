@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create quotation · Terci One</title>
+    <title>All quotes · Terci One</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -15,7 +15,8 @@
         </div>
         <nav>
           <a href="index.html">Dashboard</a
-          ><a class="active" href="quotation.html">Quotations</a
+          ><a class="active quote-nav" href="quotation.html"
+            >Quotations <span>＋</span></a
           ><a href="#customers">Customers</a
           ><a href="#items">Items & inventory</a
           ><a href="#purchasing">Purchasing</a><a href="#reports">Reports</a>
@@ -23,139 +24,87 @@
         <div class="sidebar-footer">Terci Communications Limited</div>
       </aside>
       <main class="main">
-        <header class="topbar">
+        <header class="topbar quote-list-topbar">
           <div>
-            <span class="eyebrow">QUOTATIONS</span>
-            <h1>Create quotation</h1>
+            <span class="eyebrow">SALES</span>
+            <h1>All Quotes <span class="title-chevron">⌄</span></h1>
           </div>
-          <a class="secondary button-link" href="index.html">← Dashboard</a>
+          <a class="primary button-link" href="new-quotation.html">＋ New</a>
         </header>
-        <section class="content">
-          <section class="panel quotation-editor">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">NEW QUOTE</span>
-                <h2>Customer details</h2>
-                <p>
-                  Prepare a professional quote while keeping your internal costs
-                  protected.
-                </p>
-              </div>
+        <section class="content quote-list-content">
+          <section class="panel quote-list-panel">
+            <div class="quote-list-toolbar">
+              <span class="toolbar-filter">☷</span
+              ><input
+                id="quote-filter"
+                placeholder="Search quotes, customers or reference"
+              />
             </div>
-            <div class="form-grid quote-meta">
-              <label
-                >Customer
-                <div class="search-field">
-                  <input
-                    id="customer-search"
-                    placeholder="Search customer name"
-                  /><span>⌕</span>
-                </div>
-                <small>Start typing to find a customer</small></label
-              ><label>Quote number<input value="QT-2026-0001" /></label
-              ><label>Quote date<input type="date" /></label
-              ><label
-                >Validity<select>
-                  <option>30 days</option>
-                  <option>60 days</option>
-                  <option>90 days</option>
-                </select></label
-              >
-            </div>
-            <div class="items-head">
-              <div>
-                <h3>Quotation items</h3>
-                <p>
-                  Items come from storage. Search and select an item to add it.
-                </p>
-              </div>
-            </div>
-            <div class="item-search search-field">
-              <input id="item-search" placeholder="Search stored items" /><span
-                >⌕</span
-              >
-            </div>
-            <small class="helper"
-              >Select an item to add it to the quotation</small
-            >
             <div class="table-wrap">
-              <table>
+              <table class="quote-list-table">
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Selling price</th>
-                    <th class="cost">Internal cost</th>
-                    <th class="profit">Profit</th>
+                    <th></th>
+                    <th>Date</th>
+                    <th>Quote number</th>
+                    <th>Reference number</th>
+                    <th>Customer name</th>
+                    <th>Status</th>
+                    <th>Amount</th>
                   </tr>
                 </thead>
-                <tbody id="lines">
+                <tbody id="quote-list">
                   <tr>
-                    <td colspan="5" class="empty">
-                      No items added yet. Search for an item above.
-                    </td>
+                    <td colspan="7" class="empty">Loading quotations…</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <section class="additional-costs">
-              <div class="additional-costs-head">
-                <h3>Additional costs</h3>
-                <p>
-                  Capture transport, labour, or other internal costs separately.
-                </p>
-              </div>
-              <button
-                class="secondary additional"
-                onclick="addAdditionalCost()"
-              >
-                ＋ Add additional cost line
-              </button>
-            </section>
-            <div class="quote-actions">
-              <button class="primary" onclick="alert('Quotation saved')">
-                Save quotation</button
-              ><button
-                class="secondary"
-                onclick="alert('Customer preview coming next')"
-              >
-                Preview customer copy
-              </button>
-            </div>
           </section>
-          <aside class="quote-summary panel">
-            <h2>Quotation summary</h2>
-            <div class="summary-row">
-              <span>Subtotal</span><strong>K0.00</strong>
-            </div>
-            <div class="summary-row">
-              <span>Additional costs</span><strong>K0.00</strong>
-            </div>
-            <div class="summary-row internal-row">
-              <span>Profit</span><strong>K0.00</strong>
-            </div>
-            <div class="summary-total">
-              <span>Total</span><strong>K0.00</strong>
-            </div>
-            <div class="internal-note">
-              <strong>Internal view</strong>
-              <p>
-                Cost and profit are visible only to authorised Terci users and
-                will not appear on the customer quotation.
-              </p>
-            </div>
-          </aside>
         </section>
       </main>
     </div>
     <script src="app.js"></script>
     <script>
-      function addAdditionalCost() {
-        const row = document.createElement("tr");
-        row.innerHTML =
-          '<td colspan="3"><input placeholder="Additional cost description"></td><td class="cost"><input placeholder="K0.00"></td><td class="profit">—</td>';
-        document.getElementById("lines").appendChild(row);
+      const list = document.getElementById("quote-list"),
+        filter = document.getElementById("quote-filter");
+      let quotes = [];
+      const qmoney = (n) =>
+        "K" +
+        Number(n || 0).toLocaleString("en-ZM", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      function drawQuotes() {
+        const term = (filter.value || "").toLowerCase();
+        const shown = quotes.filter((q) =>
+          [q.quote_number, q.customer_name, q.reference_number, q.status].some(
+            (v) =>
+              String(v || "")
+                .toLowerCase()
+                .includes(term),
+          ),
+        );
+        list.innerHTML = shown.length
+          ? shown
+              .map(
+                (q) =>
+                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td></tr>`,
+              )
+              .join("")
+          : '<tr><td colspan="7" class="empty">No quotations found.</td></tr>';
       }
+      fetch("/api/quotations")
+        .then((r) => r.json())
+        .then((a) => {
+          quotes = Array.isArray(a) ? a : [];
+          drawQuotes();
+        })
+        .catch(() => {
+          list.innerHTML =
+            '<tr><td colspan="7" class="empty">Unable to load quotations.</td></tr>';
+        });
+      filter.addEventListener("input", drawQuotes);
     </script>
   </body>
 </html>
