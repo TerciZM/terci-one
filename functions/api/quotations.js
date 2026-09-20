@@ -1,4 +1,29 @@
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ env, request }) {
+  const id = new URL(request.url).searchParams.get("id");
+  if (id) {
+    const quote = await env.DB.prepare(
+      "SELECT q.*, c.name AS customer_name FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id WHERE q.id = ?",
+    )
+      .bind(id)
+      .first();
+    if (!quote)
+      return Response.json({ error: "Quotation not found" }, { status: 404 });
+    const lines = await env.DB.prepare(
+      "SELECT l.*, i.name, i.description AS item_description FROM quotation_lines l LEFT JOIN items i ON i.id=l.item_id WHERE l.quotation_id = ? ORDER BY l.id",
+    )
+      .bind(id)
+      .all();
+    const costs = await env.DB.prepare(
+      "SELECT description, amount FROM quotation_additional_costs WHERE quotation_id = ? ORDER BY id",
+    )
+      .bind(id)
+      .all();
+    return Response.json({
+      ...quote,
+      lines: lines.results || [],
+      additional_cost_lines: costs.results || [],
+    });
+  }
   const result = await env.DB.prepare(
     "SELECT q.id,q.quote_number,q.quote_date,q.validity_days,q.status,q.total,c.name AS customer_name FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id ORDER BY q.created_at DESC LIMIT 10",
   ).all();

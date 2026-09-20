@@ -194,6 +194,35 @@ if (quoteNumber && !quoteNumber.value) {
   quoteNumber.value = `QT-${yy}${mm}${dd}001`;
 }
 render();
+const quoteId = new URLSearchParams(location.search).get("id");
+if (quoteId && lines) {
+  fetch(`/api/quotations?id=${encodeURIComponent(quoteId)}`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((q) => {
+      if (!q) return;
+      const meta = document.querySelectorAll(".quote-meta input");
+      if (meta[1]) meta[1].value = q.quote_number || "";
+      if (meta[2]) meta[2].value = q.quote_date || "";
+      const validity = document.querySelector(".quote-meta select");
+      if (validity) validity.value = `${q.validity_days || 30} days`;
+      if (q.customer_id) {
+        selectedCustomer = { id: q.customer_id, name: q.customer_name || "" };
+        if (ci) {
+          ci.value = q.customer_name || "";
+          ci.disabled = true;
+        }
+      }
+      rows = (q.lines || []).map((l) => ({
+        ...l,
+        id: l.item_id,
+        name: l.name || l.description,
+        description: l.item_description || l.description,
+        quantity: l.quantity,
+      }));
+      additionalCosts = q.additional_cost_lines || [];
+      render();
+    });
+}
 const recent = document.querySelector(".recent-quotes tbody");
 if (recent)
   fetch("/api/quotations")

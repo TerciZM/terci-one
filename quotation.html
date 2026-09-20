@@ -89,7 +89,7 @@
           ? shown
               .map(
                 (q) =>
-                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td></tr>`,
+                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html?id=${encodeURIComponent(q.id)}">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td></tr>`,
               )
               .join("")
           : '<tr><td colspan="7" class="empty">No quotations found.</td></tr>';
