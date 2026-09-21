@@ -74,6 +74,63 @@ export async function onRequestPost({ env, request }) {
       0,
     );
     const total = subtotal + additional;
+    if (b.id) {
+      const existingQuote = await env.DB.prepare(
+        "SELECT id FROM quotations WHERE id = ?",
+      )
+        .bind(b.id)
+        .first();
+      if (!existingQuote)
+        return Response.json({ error: "Quotation not found" }, { status: 404 });
+      await env.DB.prepare(
+        "UPDATE quotations SET customer_id=?, quote_date=?, validity_days=?, subtotal=?, additional_costs=?, profit=?, total=? WHERE id=?",
+      )
+        .bind(
+          b.customer_id || null,
+          b.quote_date,
+          Number(b.validity_days || 30),
+          subtotal,
+          additional,
+          profit,
+          total,
+          b.id,
+        )
+        .run();
+      await env.DB.prepare("DELETE FROM quotation_lines WHERE quotation_id=?")
+        .bind(b.id)
+        .run();
+      await env.DB.prepare(
+        "DELETE FROM quotation_additional_costs WHERE quotation_id=?",
+      )
+        .bind(b.id)
+        .run();
+      for (const l of lines)
+        await env.DB.prepare(
+          "INSERT INTO quotation_lines (quotation_id,item_id,description,quantity,unit_of_measure,selling_price,internal_cost,profit) VALUES (?,?,?,?,?,?,?,?)",
+        )
+          .bind(
+            b.id,
+            l.item_id || null,
+            l.description || "Item",
+            Number(l.quantity || 1),
+            l.unit_of_measure || "Each",
+            Number(l.selling_price || 0),
+            Number(l.internal_cost || 0),
+            Number(l.quantity || 1) *
+              (Number(l.selling_price || 0) - Number(l.internal_cost || 0)),
+          )
+          .run();
+      for (const c of costs)
+        await env.DB.prepare(
+          "INSERT INTO quotation_additional_costs (quotation_id,description,amount) VALUES (?,?,?)",
+        )
+          .bind(b.id, c.description || "Additional cost", Number(c.amount || 0))
+          .run();
+      return Response.json(
+        { id: b.id, total, quote_number: b.quote_number },
+        { status: 200 },
+      );
+    }
     const r = await env.DB.prepare(
       "INSERT INTO quotations (quote_number,customer_id,quote_date,validity_days,status,subtotal,additional_costs,profit,total) VALUES (?,?,?,?, 'Draft',?,?,?,?)",
     )
