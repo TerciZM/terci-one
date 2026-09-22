@@ -25,11 +25,48 @@ body {
 }
 .sidebar {
   width: 245px;
+  flex: 0 0 245px;
+  position: relative;
   background: var(--navy);
   color: #fff;
   padding: 25px 18px;
   display: flex;
   flex-direction: column;
+  transition: width 0.2s ease, flex-basis 0.2s ease, padding 0.2s ease;
+}
+.sidebar-toggle {
+  position: absolute;
+  top: 15px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  margin: 0 !important;
+  padding: 0;
+  border: 1px solid #49676b;
+  border-radius: 8px;
+  background: transparent;
+  color: #eaf1f1;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sidebar-toggle:hover {
+  background: #2c5056;
+}
+.app-shell.sidebar-collapsed .sidebar {
+  width: 58px;
+  flex-basis: 58px;
+  align-items: center;
+  padding: 12px 8px;
+}
+.app-shell.sidebar-collapsed .sidebar > :not(.sidebar-toggle) {
+  display: none;
+}
+.app-shell.sidebar-collapsed .sidebar-toggle {
+  left: 12px;
+  right: auto;
 }
 .brand {
   display: flex;
@@ -468,7 +505,16 @@ th {
   }
   .sidebar {
     width: 100%;
+    flex-basis: auto;
     padding: 12px;
+  }
+  .app-shell.sidebar-collapsed .sidebar {
+    width: 100%;
+    height: 58px;
+    min-height: 58px;
+    flex-basis: auto;
+    align-items: flex-end;
+    padding: 10px 12px;
   }
   .sidebar nav {
     display: flex;
