@@ -123,29 +123,50 @@ function addLine() {
   render();
   lines.querySelector(".line-search:last-of-type")?.focus();
 }
+function buildCustomerQuoteHTML(quote) {
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const amount = value => Number(value || 0).toLocaleString("en-GB", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const date = new Date(`${quote.date}T12:00:00`);
+  const expiry = new Date(date);
+  expiry.setDate(expiry.getDate() + Number(quote.validityDays || 30));
+  const formatDate = value => Number.isNaN(value.getTime()) ? "" : value.toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"});
+  const subtotal = quote.rows.reduce((sum,r) => sum + Number(r.quantity ?? 1)*Number(r.selling_price || 0),0);
+  const charges = Number(quote.additionalCharges || 0);
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(quote.number)}</title><style>
+  @page{size:A4;margin:16mm}
+  *{box-sizing:border-box}body{margin:0;background:#eef1f3;color:#333;font:10px Arial,sans-serif;line-height:1.4}
+  .actions{max-width:210mm;margin:16px auto;text-align:right}.actions button{border:0;background:#ef1734;color:white;border-radius:5px;padding:10px 18px;cursor:pointer}
+  .page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm;background:white;display:flex;flex-direction:column}
+  .header{display:flex;align-items:flex-start;justify-content:space-between;min-height:50mm}.logo{width:55mm;height:50mm;object-fit:contain}.company{text-align:right;font-size:8px;line-height:1.35;padding-top:2mm}.company strong{font-size:9px}
+  .title{display:flex;align-items:center;gap:6mm;margin:5mm 0 7mm;font-size:17px;font-weight:400}.title:before,.title:after{content:"";height:1px;background:#ddd;flex:1}
+  .meta{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm}.bill{width:57%;font-size:8px;line-height:1.5}.bill strong{font-size:9px}.meta table{width:40%;border-collapse:collapse}.meta td{border:1px solid #ddd;padding:5px 7px}.meta td:first-child{background:#eee;width:50%}
+  .subject{margin:10mm 0 8mm}.subject p{margin:4px 0 0}
+  .items{width:100%;border-collapse:collapse;table-layout:fixed}.items th,.items td{border:1px solid #e3e3e3;padding:7px 8px;vertical-align:top;text-align:right}.items th{font-weight:400;background:#eee}.items th:nth-child(2),.items td:nth-child(2){text-align:left}.items th:first-child,.items td:first-child{text-align:center}.items small{display:block;color:#888;font-size:9px;line-height:1.35;white-space:pre-line;overflow-wrap:anywhere}.items td:nth-child(2){overflow-wrap:anywhere}.items tbody td{padding-top:12px;padding-bottom:18px}.items .num{white-space:nowrap}thead{display:table-header-group}tr{break-inside:avoid}
+  .quote-footer{margin-top:auto;padding-top:8mm;break-inside:avoid;flex-shrink:0}.footer-box{border:1px solid #bfc7cc;padding:5mm}.bottom{display:flex;justify-content:space-between;gap:10mm;margin-top:0;break-inside:avoid}.bank{width:48%;line-height:1.5}.totals{width:40%;margin:3mm 0 0 auto;break-inside:avoid;flex-shrink:0}.totals div{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd}.totals .grand{font-weight:bold;font-size:11px}
+  .terms{width:52%;margin:0;padding-left:5mm;border-left:1px solid #ddd;break-inside:avoid}.terms h3{font-size:10px;font-weight:400;margin:0 0 6px}.terms p{margin:0}
+  @media print{body{background:white}.actions{display:none}.page{width:auto;min-height:264mm;margin:0;padding:0}.items th,.items td{padding:5px 7px}.items small{font-size:8px}.header{min-height:50mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body><div class="actions"><button onclick="window.print()">Print / Save PDF</button></div><main class="page">
+  <header class="header"><img class="logo" src="${esc(quote.logoUrl)}" alt="Terci Communications Limited"><div class="company"><strong>Terci Communications Limited (Z)</strong><br>11401<br>Kitwe West<br>Kitwe Copperbelt 10101<br>Zambia<br>+260972888575<br>info@terci.net</div></header>
+  <h1 class="title">QUOTE</h1><section class="meta"><div class="bill">Bill To<br><strong>${esc(quote.customer.name)}</strong>${quote.customer.address ? '<br>'+esc(quote.customer.address).replace(/\r?\n/g,'<br>') : ''}</div><table><tr><td>Quote#</td><td>${esc(quote.number)}</td></tr><tr><td>Quote Date</td><td>${formatDate(date)}</td></tr><tr><td>Expiry Date</td><td>${formatDate(expiry)}</td></tr></table></section>
+  <section class="subject">Subject :<p>${esc(quote.subject || quote.rows.map(r=>r.name || r.description).filter(Boolean).join(', '))}</p></section>
+  <table class="items"><colgroup><col style="width:5%"><col style="width:58%"><col style="width:11%"><col style="width:11%"><col style="width:15%"></colgroup><thead><tr><th>#</th><th>Item &amp; Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${quote.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.name || r.description || 'Item')}${r.description && r.description !== r.name ? `<small>${esc(r.description)}</small>`:''}</td><td class="num">${amount(r.quantity ?? 1)}<small>${esc(r.unit_of_measure || '')}</small></td><td class="num">${amount(r.selling_price)}</td><td class="num">${amount(Number(r.quantity ?? 1)*Number(r.selling_price || 0))}</td></tr>`).join('')}</tbody></table>
+  <div class="totals"><div><span>Sub Total</span><span>${amount(subtotal)}</span></div>${charges ? `<div><span>Additional charges</span><span>${amount(charges)}</span></div>`:''}<div class="grand"><span>Total</span><span>K${amount(subtotal+charges)}</span></div></div>
+  <footer class="quote-footer"><div class="footer-box"><section class="bottom"><div class="bank">ABSA Bank ZMW Account:<br>Terci Communications Limited<br>Absa Bank Zambia PLC<br>A/C 1161826<br>Swift Code: BARCZMLX<br>Branch: Kitwe City Square<br>Branch Sort Code: 020209</div>
+  <section class="terms"><h3>Terms &amp; Conditions</h3><p>Prices are quoted in Zambian Kwacha (ZMW).<br>Validity: ${esc(quote.validityDays || 30)} days from date of quotation.<br>Delivery and installation timelines to be communicated upon confirmation.</p></section></section></div></footer></main></body></html>`;
+}
 function previewCustomerCopy() {
-  const customer =
-    selectedCustomer?.name ||
-    document.getElementById("customer-search")?.value ||
-    "Customer";
-  const number = document.querySelector("#quote-number")?.value || "Quotation";
-  const date = document.querySelectorAll(".quote-meta input")[2]?.value || "";
-  const validity =
-    document.querySelector(".quote-meta select")?.value || "30 days";
-  const total =
-    rows.reduce(
-      (s, r) => s + Number(r.quantity || 1) * Number(r.selling_price || 0),
-      0,
-    ) + additionalCosts.reduce((s, c) => s + Number(c.amount || 0), 0);
-  const popup = window.open(
-    "",
-    "terci-customer-preview",
-    "width=900,height=700",
-  );
-  if (!popup)
-    return alert("Please allow pop-ups to preview the customer copy.");
-  popup.document.write(`<html><head><title>${number}</title><style>
-  @page{size:A4;margin:10mm}body{font:13px Arial,sans-serif;color:#3c4144;margin:0;padding:30px;background:#fff} .page{max-width:860px;min-height:1120px;margin:auto;display:flex;flex-direction:column}.header{display:grid;grid-template-columns:1fr 1fr;align-items:start;min-height:155px;padding-bottom:18px}.brand{color:#e51e35;font-size:24px;font-weight:700;letter-spacing:2px;padding-top:12px;line-height:1.05}.logo{width:100%;height:155px;display:flex;align-items:flex-start;justify-content:flex-start}.logo img{width:145px;height:145px;object-fit:contain;object-position:center top}.company{text-align:right;line-height:1.45}.company strong{font-size:16px}.title{display:flex;align-items:center;gap:20px;margin:4px 0 12px;color:#444}.title:before,.title:after{content:"";height:1px;background:#ddd;flex:1}.title b{font-size:23px;font-weight:400}.meta{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:12px}.bill{line-height:1.55}.bill{line-height:1.55}.bill strong{font-size:15px}.meta table{width:100%;border-collapse:collapse}.meta td{padding:5px;border:1px solid #ddd}.meta td:first-child{background:#f0f0f0;width:48%}.subject{margin:10px 0 14px}.items{width:100%;border-collapse:collapse}.items th{background:#efefef;color:#3c4144;font-weight:400}.items th,.items td{padding:4px;border:1px solid #ddd}.items tbody tr:nth-child(even){background:#f3f3f3}.items th:first-child,.items td:first-child{width:42px;text-align:center}.items th:nth-child(2),.items td:nth-child(2){text-align:left}.items th:not(:nth-child(2)),.items td:not(:nth-child(2)){text-align:right}.items small{display:block;color:#999;margin-top:5px}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:12px}.bank{line-height:1.45}.totals{justify-self:end;width:100%}.totals div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #ddd;font-weight:700}.totals .grand{font-size:17px;font-weight:bold}.terms{margin-top:12px;line-height:1.5}.footer{border-top:1px solid #ddd;margin-top:12px;padding-top:8px;color:#667080;font-size:11px;text-align:center;line-height:1.4}.print-actions{max-width:860px;margin:0 auto 14px;text-align:right}.print-actions button{background:#ef1b2d;color:#fff;border:0;border-radius:5px;padding:10px 18px;font-size:14px;cursor:pointer} @media print{body{padding:0;font-size:8px}.print-actions{display:none}.page{max-width:none;min-height:0}.header{min-height:145px;padding-bottom:8px}.logo{height:145px}.logo img{width:135px;height:135px}.company{font-size:8px;line-height:1.15}.company strong{font-size:10px}.title{margin:2px 0 8px}.title b{font-size:18px}.meta{gap:12px;margin-bottom:8px}.meta td{padding:3px}.bill{font-size:8px;line-height:1.15}.bill strong{font-size:10px}.subject{margin:6px 0 8px}.items{font-size:8px}.items th,.items td{padding:3px}.items small{font-size:7px;margin-top:2px}.bottom{gap:15px;margin-top:8px}.bank{font-size:8px}.totals div{padding:4px}.totals .grand{font-size:12px}.terms{font-size:8px;margin-top:8px}.footer{font-size:7px;margin-top:8px;padding-top:5px}} </style></head><body><div class="print-actions"><button onclick="window.print()">Print / Save PDF</button></div><div class="page"><header class="header"><div class="logo" style="justify-content:flex-start"><img src="terci-logo.png" alt="Terci Communications Limited logo"></div><div class="company"><strong>Terci Communications Limited (Z)</strong><br>Company ID: 120210015865<br>Tax ID: 2807222406<br>11401 Kitwe West<br>Kitwe Copperbelt 10101<br>Zambia<br>+260 972 888 575<br>terci.ltd@gmail.com</div></header><div class="title"><b>QUOTE</b></div><section class="meta"><div class="bill">Bill To<br><strong>${customer}</strong><br>Kitwe<br>Copperbelt<br>Zambia</div><table><tr><td>Quote#</td><td>${number}</td></tr><tr><td>Quote Date</td><td>${date}</td></tr><tr><td>Expiry Date</td><td>${date}</td></tr></table></section><div class="subject"><b>Subject:</b><br><br>Quotation for Terci Communications services</div><table class="items"><thead><tr><th>#</th><th>Item &amp; Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.name || r.description || "Item"}<small>${r.description || ""}</small></td><td>${Number(r.quantity || 1).toFixed(2)}<small>${r.unit_of_measure || "Each"}</small></td><td>${money(r.selling_price)}</td><td>${money((r.quantity || 1) * Number(r.selling_price || 0))}</td></tr>`).join("")}</tbody></table><section class="bottom"><div class="bank"><b>Payment Details</b><br>Terci Communications Limited<br>Payment details will be provided on request.</div><div class="totals"><div><span>Subtotal</span><span>K${Number(total || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div><div class="grand"><span>Total</span><span>K${Number(total || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div></div></section><section class="terms"><h3>Terms &amp; Conditions</h3>Prices are quoted in Zambian Kwacha (ZMW).<br>Validity: ${validity} from date of quotation.<br>Delivery and installation timelines will be communicated upon confirmation.</section><div class="footer">Terci Communications Limited · Integrated Security &amp; Connectivity Solutions</div></div></body></html>`);
+  const popup = window.open("", "terci-customer-preview", "width=950,height=800");
+  if (!popup) return alert("Please allow pop-ups to preview the customer copy.");
+  popup.document.open();
+  popup.document.write(buildCustomerQuoteHTML({
+    customer: selectedCustomer || {name:document.getElementById("customer-search")?.value || "Customer"},
+    number:document.querySelector("#quote-number")?.value || "Quotation",
+    date:document.querySelectorAll(".quote-meta input")[2]?.value || new Date().toISOString().slice(0,10),
+    validityDays:Number(document.querySelector(".quote-meta select")?.value?.match(/\d+/)?.[0] || 30),
+    rows,
+    additionalCharges:additionalCosts.reduce((sum,c)=>sum+Number(c.amount || 0),0),
+    logoUrl:new URL("terci-logo.png",location.href).href
+  }));
   popup.document.close();
 }
 function addAdditionalCost() {
@@ -238,7 +259,7 @@ if (quoteId && lines) {
       const validity = document.querySelector(".quote-meta select");
       if (validity) validity.value = `${q.validity_days || 30} days`;
       if (q.customer_id) {
-        selectedCustomer = { id: q.customer_id, name: q.customer_name || "" };
+        selectedCustomer = { id: q.customer_id, name: q.customer_name || "", address: q.customer_address || "" };
         if (ci) {
           ci.value = q.customer_name || "";
           ci.disabled = true;
