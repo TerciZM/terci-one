@@ -19,6 +19,8 @@ function menu(a, input, pick) {
   b.className = "suggestions";
   Object.assign(b.style, {
     position: "absolute",
+    top: "100%",
+    left: "0",
     zIndex: 20,
     background: "#fff",
     border: "1px solid #dbe5e4",
@@ -54,7 +56,7 @@ function render() {
     ? rows
         .map(
           (r, i) =>
-            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : ""}` : `<input class="line-search" data-i="${i}" placeholder="Search item or description">`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td><select class="unit-input" data-i="${i}"><option ${r.unit_of_measure === "Each" ? "selected" : ""}>Each</option><option ${r.unit_of_measure === "Metre" ? "selected" : ""}>Metre</option><option ${r.unit_of_measure === "Roll" ? "selected" : ""}>Roll</option><option ${r.unit_of_measure === "Day" ? "selected" : ""}>Day</option><option ${r.unit_of_measure === "Month" ? "selected" : ""}>Month</option><option ${r.unit_of_measure === "Job" ? "selected" : ""}>Job</option><option ${r.unit_of_measure === "Set" ? "selected" : ""}>Set</option></select></td><td><input class="price-input" data-field="selling_price" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.selling_price || 0)}"></td><td class="cost"><input class="price-input" data-field="internal_cost" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.internal_cost || 0)}"></td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
+            `<tr><td>${r.id ? `<b>${r.name}</b>${r.description ? `<small class="line-description">${r.description}</small>` : ""}` : `<div class="line-search-field"><span class="line-search-icon" aria-hidden="true">⌕</span><input class="line-search" data-i="${i}" aria-label="Search item or description" placeholder="Search item or description"></div>`}</td><td><input class="qty" data-i="${i}" type="number" min="1" value="${r.quantity || 1}"></td><td><select class="unit-input" data-i="${i}"><option ${r.unit_of_measure === "Each" ? "selected" : ""}>Each</option><option ${r.unit_of_measure === "Metre" ? "selected" : ""}>Metre</option><option ${r.unit_of_measure === "Roll" ? "selected" : ""}>Roll</option><option ${r.unit_of_measure === "Day" ? "selected" : ""}>Day</option><option ${r.unit_of_measure === "Month" ? "selected" : ""}>Month</option><option ${r.unit_of_measure === "Job" ? "selected" : ""}>Job</option><option ${r.unit_of_measure === "Set" ? "selected" : ""}>Set</option></select></td><td><input class="price-input" data-field="selling_price" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.selling_price || 0)}"></td><td class="cost"><input class="price-input" data-field="internal_cost" data-i="${i}" type="number" min="0" step="0.01" value="${Number(r.internal_cost || 0)}"></td><td class="profit">${money((r.selling_price - r.internal_cost) * (r.quantity || 1))}</td><td><button type="button" data-remove="${i}">×</button></td></tr>`,
         )
         .join("")
     : '<tr><td colspan="7" class="empty">No items added yet. Click “Add another item or service”.</td></tr>';
@@ -132,7 +134,7 @@ function buildCustomerQuoteHTML(quote) {
   const formatDate = value => Number.isNaN(value.getTime()) ? "" : value.toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"});
   const subtotal = quote.rows.reduce((sum,r) => sum + Number(r.quantity ?? 1)*Number(r.selling_price || 0),0);
   const charges = Number(quote.additionalCharges || 0);
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(quote.number)}</title><style>
+  return `<!doctype html><html><head><meta charset="utf-8"><link rel="icon" type="image/png" href="${esc(quote.logoUrl)}"><title>${esc(quote.number)}</title><style>
   @page{size:A4;margin:16mm}
   *{box-sizing:border-box}body{margin:0;background:#eef1f3;color:#333;font:10px Arial,sans-serif;line-height:1.4}
   .actions{max-width:210mm;margin:16px auto;text-align:right}.actions button{border:0;background:#ef1734;color:white;border-radius:5px;padding:10px 18px;cursor:pointer}

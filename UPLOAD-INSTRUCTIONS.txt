@@ -1,1 +1,7 @@
-Replace app.js and functions/api/quotations.js in the matching locations in your GitHub repository. Keep terci-logo.png in the website root. Wait for Cloudflare deployment, then hard refresh. No database migration or seed import is required. The HTML preview uses the application template with sample data. The PDF is a layout mockup; browser pagination may differ. Use Print / Save PDF in the application to export your actual quotation.
+TERCI QUOTATION UI UPDATE
+
+This update adds the Terci logo as the browser-tab icon, makes the item/description search field a consistent styled input, and includes the corrected quotation save endpoint.
+
+Replace the matching files in the root of the GitHub Pages project with the files in this ZIP, preserving the functions/api/quotations.js path. Commit the changes and let Cloudflare Pages finish deploying.
+
+No database SQL is required. The subject column is already present.

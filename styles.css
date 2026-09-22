@@ -227,6 +227,44 @@ button {
   color: #547176;
   font-size: 19px;
 }
+.line-search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 180px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #cbd9d8;
+  border-radius: 7px;
+  background: #fff;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.line-search-field:focus-within {
+  border-color: #4f8d91;
+  box-shadow: 0 0 0 3px rgb(79 141 145 / 13%);
+}
+.line-search-icon {
+  flex: 0 0 auto;
+  color: #71868a;
+  font-size: 17px;
+  line-height: 1;
+}
+.line-search-field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--navy);
+  font: inherit;
+}
+.line-search-field input::placeholder {
+  color: #8a999b;
+}
 .items-head {
   display: flex;
   justify-content: space-between;
