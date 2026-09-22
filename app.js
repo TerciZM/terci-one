@@ -1,5 +1,8 @@
 const sidebarShell = document.querySelector(".app-shell");
 const sidebarToggle = document.querySelector(".sidebar-toggle");
+document.querySelectorAll('a[href="#items"]').forEach((link) => {
+  link.href = "items.html";
+});
 if (sidebarShell && sidebarToggle) {
   const sidebarStorageKey = "terci-sidebar-collapsed";
   const setSidebarCollapsed = (collapsed) => {
