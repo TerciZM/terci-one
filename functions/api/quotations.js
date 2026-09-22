@@ -133,7 +133,7 @@ export async function onRequestPost({ env, request }) {
       );
     }
     const r = await env.DB.prepare(
-      "INSERT INTO quotations (quote_number,customer_id,subject,quote_date,validity_days,status,subtotal,additional_costs,profit,total) VALUES (?,?,?,?, 'Draft',?,?,?,?)",
+      "INSERT INTO quotations (quote_number,customer_id,subject,quote_date,validity_days,status,subtotal,additional_costs,profit,total) VALUES (?,?,?,?,?,'Draft',?,?,?,?)",
     )
       .bind(
         quoteNumber,
