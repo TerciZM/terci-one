@@ -163,6 +163,7 @@ function previewCustomerCopy() {
     number:document.querySelector("#quote-number")?.value || "Quotation",
     date:document.querySelectorAll(".quote-meta input")[2]?.value || new Date().toISOString().slice(0,10),
     validityDays:Number(document.querySelector(".quote-meta select")?.value?.match(/\d+/)?.[0] || 30),
+    subject:document.querySelector("#quote-subject")?.value || "",
     rows,
     additionalCharges:additionalCosts.reduce((sum,c)=>sum+Number(c.amount || 0),0),
     logoUrl:new URL("terci-logo.png",location.href).href
@@ -196,6 +197,7 @@ async function saveQuotation() {
         customer_id: selectedCustomer?.id || null,
         quote_date: d,
         validity_days: v,
+        subject: document.querySelector("#quote-subject")?.value || "",
         lines: rows,
         additional_costs: additionalCosts,
       }),
@@ -273,6 +275,8 @@ if (quoteId && lines) {
         quantity: l.quantity,
       }));
       additionalCosts = q.additional_cost_lines || [];
+      const subject = document.querySelector("#quote-subject");
+      if (subject) subject.value = q.subject || "";
       render();
     });
 }

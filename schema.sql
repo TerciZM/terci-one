@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS quotations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   quote_number TEXT NOT NULL UNIQUE,
+  subject TEXT,
   customer_id INTEGER,
   quote_date TEXT NOT NULL,
   validity_days INTEGER NOT NULL DEFAULT 30,

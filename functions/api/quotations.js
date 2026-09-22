@@ -83,10 +83,11 @@ export async function onRequestPost({ env, request }) {
       if (!existingQuote)
         return Response.json({ error: "Quotation not found" }, { status: 404 });
       await env.DB.prepare(
-        "UPDATE quotations SET customer_id=?, quote_date=?, validity_days=?, subtotal=?, additional_costs=?, profit=?, total=? WHERE id=?",
+        "UPDATE quotations SET customer_id=?, subject=?, quote_date=?, validity_days=?, subtotal=?, additional_costs=?, profit=?, total=? WHERE id=?",
       )
         .bind(
           b.customer_id || null,
+          b.subject || null,
           b.quote_date,
           Number(b.validity_days || 30),
           subtotal,
@@ -132,11 +133,12 @@ export async function onRequestPost({ env, request }) {
       );
     }
     const r = await env.DB.prepare(
-      "INSERT INTO quotations (quote_number,customer_id,quote_date,validity_days,status,subtotal,additional_costs,profit,total) VALUES (?,?,?,?, 'Draft',?,?,?,?)",
+      "INSERT INTO quotations (quote_number,customer_id,subject,quote_date,validity_days,status,subtotal,additional_costs,profit,total) VALUES (?,?,?,?, 'Draft',?,?,?,?)",
     )
       .bind(
         quoteNumber,
         b.customer_id || null,
+        b.subject || null,
         b.quote_date,
         Number(b.validity_days || 30),
         subtotal,
