@@ -1,0 +1,25 @@
+TERCI ONE — INVOICES MODULE
+
+1. Open Cloudflare Dashboard > D1 > your Terci database > Console.
+2. Run migration-invoices.sql once.
+3. Upload or replace all matching files from this ZIP in the GitHub repository.
+4. Keep functions/api/invoices.js inside the functions/api folder.
+5. Wait for the Cloudflare Pages deployment to finish.
+6. Open https://terci-one.pages.dev/invoices.html
+
+INCLUDED FUNCTIONS
+- Invoice dashboard and saved-invoice register
+- All, Draft, Sent, Unpaid, Overdue, Paid and Void views
+- Search and pagination
+- Receivables and due-date summary
+- Customer search from D1
+- Item search from D1
+- Editable quantity, unit and rate
+- Automatic due date and totals
+- Draft and Sent saving
+- Edit, void, restore and delete
+- Invoice preview and browser PDF download
+- Server-side daily sequential invoice numbers
+
+NOTE
+The "Save and mark sent" action records the invoice as Sent. Email delivery will be connected when the email workflow is added.
