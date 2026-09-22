@@ -7,6 +7,16 @@ const editableFields = [
   "contact_persons","reporting_tags","remarks"
 ];
 const fields = ["id",...editableFields,"created_at"].join(",");
+const legacyFields = ["id","name","company_name","email","phone","address","status","portal_enabled","template_name","created_at"];
+
+async function tableColumns(env) {
+  try {
+    const result = await env.DB.prepare("PRAGMA table_info(customers)").all();
+    return new Set((result.results || []).map(row => row.name));
+  } catch (_) {
+    return new Set(legacyFields);
+  }
+}
 
 function clean(body) {
   const display = String(body.display_name || body.name || "").trim();
@@ -41,9 +51,11 @@ function valuesFor(body) {
 export async function onRequestGet({ env, request }) {
   try {
     const url=new URL(request.url),q=(url.searchParams.get("q")||"").trim(),id=Number(url.searchParams.get("id"));
-    if(id){const customer=await env.DB.prepare(`SELECT ${fields} FROM customers WHERE id=?`).bind(id).first();return customer?Response.json(customer):Response.json({error:"Customer not found"},{status:404})}
-    const sql=q?`SELECT ${fields} FROM customers WHERE name LIKE ? OR display_name LIKE ? OR company_name LIKE ? OR email LIKE ? OR phone LIKE ? OR mobile LIKE ? OR customer_number LIKE ? ORDER BY name LIMIT 1000`:`SELECT ${fields} FROM customers ORDER BY name LIMIT 1000`;
-    const result=q?await env.DB.prepare(sql).bind(...Array(7).fill(`%${q}%`)).all():await env.DB.prepare(sql).all();
+    const available = await tableColumns(env), selected = [...new Set([...legacyFields,...editableFields])].filter(field => available.has(field));
+    const select = selected.join(","), searchable = ["name","company_name","email","phone","address","display_name","mobile","customer_number"].filter(field => available.has(field));
+    if(id){const customer=await env.DB.prepare(`SELECT ${select} FROM customers WHERE id=?`).bind(id).first();return customer?Response.json(customer):Response.json({error:"Customer not found"},{status:404})}
+    const sql=q?`SELECT ${select} FROM customers WHERE ${searchable.map(field=>`${field} LIKE ?`).join(" OR ")} ORDER BY name LIMIT 1000`:`SELECT ${select} FROM customers ORDER BY name LIMIT 1000`;
+    const result=q?await env.DB.prepare(sql).bind(...Array(searchable.length).fill(`%${q}%`)).all():await env.DB.prepare(sql).all();
     return Response.json(result.results||[]);
   } catch(e){return Response.json({error:e.message},{status:500})}
 }
@@ -52,8 +64,8 @@ export async function onRequestPost({ env, request }) {
   try {
     const body=clean(await request.json());
     if(!body.name)return Response.json({error:"Display name, company name, or contact name is required"},{status:400});
-    const columns=editableFields.join(","),placeholders=editableFields.map(()=>"?").join(",");
-    const result=await env.DB.prepare(`INSERT INTO customers (${columns}) VALUES (${placeholders})`).bind(...valuesFor(body)).run();
+    const available=await tableColumns(env),columns=editableFields.filter(field=>available.has(field)),placeholders=columns.map(()=>"?").join(",");
+    const result=await env.DB.prepare(`INSERT INTO customers (${columns.join(",")}) VALUES (${placeholders})`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)])).run();
     return Response.json({id:result.meta.last_row_id},{status:201});
   } catch(e){return Response.json({error:e.message},{status:500})}
 }
@@ -62,8 +74,8 @@ export async function onRequestPut({ env, request }) {
   try {
     const body=clean(await request.json()),id=Number(body.id);
     if(!id||!body.name)return Response.json({error:"Customer ID and display name are required"},{status:400});
-    const assignments=editableFields.map(field=>`${field}=?`).join(",");
-    await env.DB.prepare(`UPDATE customers SET ${assignments} WHERE id=?`).bind(...valuesFor(body),id).run();
+    const available=await tableColumns(env),columns=editableFields.filter(field=>available.has(field)),assignments=columns.map(field=>`${field}=?`).join(",");
+    await env.DB.prepare(`UPDATE customers SET ${assignments} WHERE id=?`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)]),id).run();
     return Response.json({ok:true,id});
   } catch(e){return Response.json({error:e.message},{status:500})}
 }
