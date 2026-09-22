@@ -58,6 +58,65 @@ body {
   display: grid;
   gap: 7px;
 }
+.sidebar nav > a,
+.nav-section > summary {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  color: #c9d8d8;
+  text-decoration: none;
+  padding: 10px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.nav-section > summary::-webkit-details-marker {
+  display: none;
+}
+.nav-section > summary::before {
+  content: "›";
+  color: #9cb4b5;
+  margin-right: 11px;
+  font-size: 18px;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
+}
+.nav-section[open] > summary::before {
+  transform: rotate(90deg);
+}
+.nav-section-icon {
+  margin-right: 10px;
+  color: #a9c1c2;
+  font-size: 14px;
+}
+.nav-section > summary:hover,
+.nav-section[open] > summary {
+  background: #24474d;
+  color: #fff;
+}
+.nav-submenu {
+  display: grid;
+  gap: 2px;
+  margin: 3px 0 5px 17px;
+  padding-left: 9px;
+  border-left: 1px solid #416267;
+}
+.nav-submenu a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #c9d8d8;
+  text-decoration: none;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+.nav-submenu a.active,
+.nav-submenu a:hover {
+  background: #2c5056;
+  color: #fff;
+}
 .sidebar nav a {
   color: #c9d8d8;
   text-decoration: none;
@@ -414,6 +473,28 @@ th {
   .sidebar nav {
     display: flex;
     overflow: auto;
+    align-items: flex-start;
+  }
+  .sidebar nav > a,
+  .nav-section > summary {
+    white-space: nowrap;
+  }
+  .nav-section {
+    position: relative;
+    flex: 0 0 auto;
+  }
+  .nav-section[open] .nav-submenu {
+    position: absolute;
+    z-index: 30;
+    top: 100%;
+    left: 0;
+    width: 220px;
+    margin: 4px 0 0;
+    padding: 8px;
+    border: 1px solid #416267;
+    border-radius: 9px;
+    background: var(--navy);
+    box-shadow: 0 12px 24px #0003;
   }
   .sidebar-footer {
     display: none;

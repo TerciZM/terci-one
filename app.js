@@ -1,3 +1,25 @@
+const sidebarShell = document.querySelector(".app-shell");
+const sidebarToggle = document.querySelector(".sidebar-toggle");
+if (sidebarShell && sidebarToggle) {
+  const sidebarStorageKey = "terci-sidebar-collapsed";
+  const setSidebarCollapsed = (collapsed) => {
+    sidebarShell.classList.toggle("sidebar-collapsed", collapsed);
+    sidebarToggle.textContent = collapsed ? "›" : "‹";
+    sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+    sidebarToggle.setAttribute(
+      "aria-label",
+      collapsed ? "Expand sidebar" : "Collapse sidebar",
+    );
+    sidebarToggle.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+  };
+  setSidebarCollapsed(localStorage.getItem(sidebarStorageKey) === "true");
+  sidebarToggle.addEventListener("click", () => {
+    const collapsed = !sidebarShell.classList.contains("sidebar-collapsed");
+    localStorage.setItem(sidebarStorageKey, String(collapsed));
+    setSidebarCollapsed(collapsed);
+  });
+}
+
 const lines = document.getElementById("lines");
 let selectedCustomer = null,
   rows = [],
