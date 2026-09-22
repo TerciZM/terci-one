@@ -56,7 +56,7 @@ export async function onRequestPost({ env, request }) {
         .bind(`${prefix}%`)
         .all();
       const highest = (existing.results || []).reduce((max, row) => {
-        const match = String(row.quote_number || "").match(/(\\d{3})$/);
+        const match = String(row.quote_number || "").match(/(\d+)$/);
         return match ? Math.max(max, Number(match[1])) : max;
       }, 0);
       quoteNumber = `${prefix}${String(highest + 1).padStart(3, "0")}`;
