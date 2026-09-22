@@ -1,3 +1,27 @@
+function canonicalQuoteNumber(prefix, value) {
+  const number = String(value || "").trim();
+  if (!number.startsWith(prefix)) return null;
+  const suffix = number.slice(prefix.length);
+  // Only count a clean three-digit sequence. Older malformed quote numbers
+  // must not inflate the next sequence after the repair migration is run.
+  if (!/^\d{3}$/.test(suffix)) return null;
+  return Number(suffix) > 0 ? `${prefix}${suffix}` : null;
+}
+
+async function nextQuoteNumber(db, prefix) {
+  const existing = await db
+    .prepare("SELECT quote_number FROM quotations WHERE quote_number LIKE ?")
+    .bind(`${prefix}%`)
+    .all();
+  const highest = (existing.results || []).reduce((max, row) => {
+    const canonical = canonicalQuoteNumber(prefix, row.quote_number);
+    return canonical
+      ? Math.max(max, Number(canonical.slice(-3)))
+      : max;
+  }, 0);
+  return `${prefix}${String(highest + 1).padStart(3, "0")}`;
+}
+
 export async function onRequestGet({ env, request }) {
   const id = new URL(request.url).searchParams.get("id");
   if (id) {
@@ -39,27 +63,25 @@ export async function onRequestPost({ env, request }) {
         { error: "Quote date is required" },
         { status: 400 },
       );
-    let quoteNumber = String(b.quote_number || "").trim();
-    const duplicate = quoteNumber
-      ? await env.DB.prepare(
-          "SELECT id FROM quotations WHERE quote_number = ? LIMIT 1",
-        )
-          .bind(quoteNumber)
-          .first()
-      : null;
-    if (!quoteNumber || duplicate) {
-      const date = String(b.quote_date).replace(/-/g, "");
-      const prefix = `QT-${date.slice(2, 8)}`;
-      const existing = await env.DB.prepare(
-        "SELECT quote_number FROM quotations WHERE quote_number LIKE ?",
-      )
-        .bind(`${prefix}%`)
-        .all();
-      const highest = (existing.results || []).reduce((max, row) => {
-        const match = String(row.quote_number || "").match(/(\d+)$/);
-        return match ? Math.max(max, Number(match[1])) : max;
-      }, 0);
-      quoteNumber = `${prefix}${String(highest + 1).padStart(3, "0")}`;
+    const date = String(b.quote_date).replace(/-/g, "");
+    const dateCode = date.slice(2, 8);
+    const prefix = `QT-${dateCode}`;
+    // New quote numbers are server-generated from the date and database sequence.
+    // Ignore the browser's default number so stale or malformed values cannot
+    // accumulate repeated date prefixes.
+    let quoteNumber = b.id
+      ? canonicalQuoteNumber(prefix, b.quote_number)
+      : await nextQuoteNumber(env.DB, prefix);
+    if (b.id) {
+      const duplicate = quoteNumber
+        ? await env.DB.prepare(
+            "SELECT id FROM quotations WHERE quote_number = ? AND id != ? LIMIT 1",
+          )
+            .bind(quoteNumber, Number(b.id))
+            .first()
+        : null;
+      if (!quoteNumber || duplicate)
+        quoteNumber = await nextQuoteNumber(env.DB, prefix);
     }
     const subtotal = lines.reduce(
       (s, l) => s + Number(l.quantity || 1) * Number(l.selling_price || 0),
@@ -83,9 +105,10 @@ export async function onRequestPost({ env, request }) {
       if (!existingQuote)
         return Response.json({ error: "Quotation not found" }, { status: 404 });
       await env.DB.prepare(
-        "UPDATE quotations SET customer_id=?, subject=?, quote_date=?, validity_days=?, subtotal=?, additional_costs=?, profit=?, total=? WHERE id=?",
+        "UPDATE quotations SET quote_number=?, customer_id=?, subject=?, quote_date=?, validity_days=?, subtotal=?, additional_costs=?, profit=?, total=? WHERE id=?",
       )
         .bind(
+          quoteNumber,
           b.customer_id || null,
           b.subject || null,
           b.quote_date,
@@ -128,7 +151,7 @@ export async function onRequestPost({ env, request }) {
           .bind(b.id, c.description || "Additional cost", Number(c.amount || 0))
           .run();
       return Response.json(
-        { id: b.id, total, quote_number: b.quote_number },
+        { id: b.id, total, quote_number: quoteNumber },
         { status: 200 },
       );
     }
