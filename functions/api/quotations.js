@@ -26,7 +26,7 @@ export async function onRequestGet({ env, request }) {
   const id = new URL(request.url).searchParams.get("id");
   if (id) {
     const quote = await env.DB.prepare(
-      "SELECT q.*, c.name AS customer_name, c.address AS customer_address FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id WHERE q.id = ?",
+      "SELECT q.*, c.name AS customer_name, c.address AS customer_address, c.email AS customer_email FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id WHERE q.id = ?",
     )
       .bind(id)
       .first();
@@ -49,9 +49,23 @@ export async function onRequestGet({ env, request }) {
     });
   }
   const result = await env.DB.prepare(
-    "SELECT q.id,q.quote_number,q.quote_date,q.validity_days,q.status,q.total,c.name AS customer_name FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id ORDER BY q.created_at DESC LIMIT 10",
+    "SELECT q.id,q.quote_number,q.quote_date,q.validity_days,q.status,q.subject,q.total,c.name AS customer_name FROM quotations q LEFT JOIN customers c ON c.id=q.customer_id ORDER BY q.created_at DESC LIMIT 1000",
   ).all();
   return Response.json(result.results || []);
+}
+export async function onRequestPatch({ env, request }) {
+  try {
+    const id = Number(new URL(request.url).searchParams.get("id"));
+    const body = await request.json();
+    const status = String(body.status || "");
+    if (!id) return Response.json({ error: "Quote ID is required" }, { status: 400 });
+    if (!new Set(["Draft", "Sent"]).has(status)) return Response.json({ error: "Unsupported quote status" }, { status: 400 });
+    const result = await env.DB.prepare("UPDATE quotations SET status=? WHERE id=?").bind(status, id).run();
+    if (!result.meta?.changes) return Response.json({ error: "Quotation not found" }, { status: 404 });
+    return Response.json({ ok: true, id, status });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 }
 export async function onRequestPost({ env, request }) {
   try {
