@@ -46,80 +46,38 @@
           <a class="primary button-link" href="new-quotation.html">＋ New</a>
         </header>
         <section class="content quote-list-content">
+          <section class="quote-workspace">
           <section class="panel quote-list-panel">
             <div class="quote-list-toolbar">
-              <span class="toolbar-filter">☷</span
-              ><input
+              <span class="toolbar-filter">☷</span><input
                 id="quote-filter"
                 placeholder="Search quotes, customers or reference"
               />
             </div>
-            <div class="table-wrap">
-              <table class="quote-list-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Date</th>
-                    <th>Quote number</th>
-                    <th>Reference number</th>
-                    <th>Customer name</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="quote-list">
-                  <tr>
-                    <td colspan="8" class="empty">Loading quotations…</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div id="quote-list" class="quote-list-cards"><div class="empty">Loading quotations…</div></div>
+          </section>
+          <section class="quote-selected-panel" id="quote-selected-panel">
+            <div class="quote-selected-empty"><span>▤</span><strong>Select a quote to preview it</strong><p>The quote preview and actions will appear here.</p></div>
+            <div class="quote-selected-view" id="quote-selected-view" hidden>
+              <header class="quote-selected-heading"><h2 id="quote-heading">Quote</h2><button type="button" id="quote-close" aria-label="Close quote preview">×</button></header>
+              <div class="quote-detail-toolbar"><div class="quote-detail-actions">
+                <a id="quote-edit" class="secondary button-link" href="#">✎ Edit</a>
+                <a id="quote-email" class="secondary button-link" href="#">✉ Email</a>
+                <button id="quote-print" class="secondary" type="button">▧ PDF / Print</button>
+                <a id="quote-invoice" class="primary button-link" href="#">Convert to invoice</a>
+                <button id="quote-more" class="secondary" type="button" title="More actions">…</button>
+              </div></div>
+              <div class="quote-next-banner"><span>✦</span><strong>WHAT'S NEXT?</strong><span>Send this quote to your customer or mark it as sent.</span><button id="quote-send" class="primary" type="button">Send quote</button><button id="quote-mark-sent" class="secondary" type="button">Mark as sent</button></div>
+              <div class="quote-detail-tabs"><button class="active" type="button">Quote details</button><span class="quote-detail-mode"><button id="quote-details-mode" class="active" type="button">Details</button><button id="quote-pdf-mode" type="button">PDF</button></span></div>
+              <div id="quote-summary-meta" class="quote-summary-meta"></div>
+              <div class="quote-preview-shell"><iframe id="quote-preview" title="Customer quotation preview"></iframe></div>
             </div>
+          </section>
           </section>
         </section>
       </main>
     </div>
     <script src="app.js"></script>
-    <script>
-      const list = document.getElementById("quote-list"),
-        filter = document.getElementById("quote-filter");
-      let quotes = [];
-      const qmoney = (n) =>
-        "K" +
-        Number(n || 0).toLocaleString("en-ZM", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-      function drawQuotes() {
-        const term = (filter.value || "").toLowerCase();
-        const shown = quotes.filter((q) =>
-          [q.quote_number, q.customer_name, q.reference_number, q.status].some(
-            (v) =>
-              String(v || "")
-                .toLowerCase()
-                .includes(term),
-          ),
-        );
-        list.innerHTML = shown.length
-          ? shown
-              .map(
-                (q) =>
-                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html?id=${encodeURIComponent(q.id)}">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td><td><a class="secondary button-link quote-invoice-button" href="new-invoice.html?quote_id=${encodeURIComponent(q.id)}">Create invoice</a></td></tr>`,
-              )
-              .join("")
-          : '<tr><td colspan="8" class="empty">No quotations found.</td></tr>';
-      }
-      fetch("/api/quotations")
-        .then((r) => r.json())
-        .then((a) => {
-          quotes = Array.isArray(a) ? a : [];
-          drawQuotes();
-        })
-        .catch(() => {
-          list.innerHTML =
-            '<tr><td colspan="8" class="empty">Unable to load quotations.</td></tr>';
-        });
-      filter.addEventListener("input", drawQuotes);
-    </script>
+    <script src="quotation-page.js"></script>
   </body>
 </html>
