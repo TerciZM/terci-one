@@ -1,3 +1,4 @@
+(() => {
 const $=id=>document.getElementById(id),money=n=>"K"+Number(n||0).toLocaleString("en-ZM",{minimumFractionDigits:2,maximumFractionDigits:2});
 function updateMargin(){const purchase=Math.max(0,Number($("item-purchase-price").value||0)),selling=Math.max(0,Number($("item-selling-price").value||0)),margin=selling-purchase,pct=selling>0?margin/selling*100:0;$("preview-purchase").textContent=money(purchase);$("preview-selling").textContent=money(selling);$("preview-margin").textContent=money(margin);$("preview-margin").className=margin>=0?'positive':'negative';$("preview-margin-percent").textContent=`${pct.toFixed(1)}%`}
 function updateType(){const type=document.querySelector('[name="item-type"]:checked').value;$("stock-field").hidden=type==='Service'}
@@ -6,3 +7,4 @@ async function load(id){const r=await fetch(`/api/items?id=${id}`),item=await r.
 $("item-editor").onsubmit=async e=>{e.preventDefault();const data=body(),r=await fetch('/api/items',{method:data.id?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)}),result=await r.json();if(!r.ok)return alert(result.error||'Could not save item');alert(`Item saved: ${data.name}`);location.href='items.html'};
 document.querySelectorAll('[name="item-type"]').forEach(radio=>radio.onchange=updateType);$("item-selling-price").oninput=updateMargin;$("item-purchase-price").oninput=updateMargin;$("item-status").onchange=()=>{$("item-status-badge").textContent=$("item-status").value;$("item-status-badge").className=`customer-status ${$("item-status").value.toLowerCase()}`};
 const id=new URLSearchParams(location.search).get('id');if(id)load(id);else{updateType();updateMargin()}
+})();
