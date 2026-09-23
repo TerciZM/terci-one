@@ -10,12 +10,15 @@
     const term = (filter.value || "").toLowerCase().trim();
     const shown = quotes.filter((q) => [q.quote_number, q.customer_name, q.subject, q.status].some((v) => String(v || "").toLowerCase().includes(term)));
     list.innerHTML = shown.length ? shown.map((q) => `
-      <button class="quote-list-card ${String(q.id) === String(selectedId) ? "selected" : ""}" type="button" data-quote-id="${esc(q.id)}">
-        <span class="quote-card-main"><strong>${esc(q.customer_name || "Customer")}</strong><b>${money(q.total)}</b></span>
-        <span class="quote-card-meta"><span>${esc(q.quote_number || "—")}</span><span>·</span><span>${formatDate(q.quote_date)}</span></span>
-        <span class="quote-card-status ${String(q.status || "Draft").toLowerCase()}">${esc(q.status || "Draft")}</span>
-        ${q.subject ? `<span class="quote-card-subject">${esc(q.subject)}</span>` : ""}
-      </button>`).join("") : '<div class="empty">No quotations found.</div>';
+      <tr class="quote-row ${String(q.id) === String(selectedId) ? "selected" : ""}" data-quote-id="${esc(q.id)}">
+        <td class="quote-check-column"><input type="checkbox" data-quote-check="${esc(q.id)}" aria-label="Select quote ${esc(q.quote_number || "")}"></td>
+        <td>${formatDate(q.quote_date)}</td><td><button class="quote-number-button" type="button" data-open-quote="${esc(q.id)}">${esc(q.quote_number || "—")}</button></td>
+        <td>${esc(q.reference_number || "—")}</td><td>${esc(q.customer_name || "—")}</td>
+        <td><span class="quote-card-status ${String(q.status || "Draft").toLowerCase()}">${esc(q.status || "Draft")}</span></td>
+        <td class="quote-amount-cell">${money(q.total)}</td><td></td>
+      </tr>`).join("") : '<tr><td colspan="8" class="empty">No quotations found.</td></tr>';
+    const selectAll = $("quote-select-all");
+    if (selectAll) selectAll.checked = false;
   }
 
   function openQuote(id) {
@@ -48,7 +51,9 @@
     drawQuotes();
   }
 
-  list.addEventListener("click", (event) => { const button = event.target.closest("[data-quote-id]"); if (button) openQuote(button.dataset.quoteId); });
+  list.addEventListener("click", (event) => { if (event.target.closest("input")) return; const row = event.target.closest("[data-quote-id]"); if (row) openQuote(row.dataset.quoteId); });
+  list.addEventListener("change", (event) => { const checkbox = event.target.closest("[data-quote-check]"); if (checkbox) event.stopPropagation(); });
+  $("quote-select-all").addEventListener("change", (event) => { list.querySelectorAll("[data-quote-check]").forEach((checkbox) => { checkbox.checked = event.target.checked; }); });
   filter.addEventListener("input", drawQuotes);
   $("quote-close").onclick = () => { selectedId = null; loadedQuote = null; $("quote-workspace").classList.remove("has-selection"); $("quote-selected-view").hidden = true; $("quote-selected-panel").hidden = true; const url = new URL(location.href); url.searchParams.delete("id"); history.replaceState({}, "", url); drawQuotes(); };
   $("quote-print").onclick = () => preview.contentWindow?.print();

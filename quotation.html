@@ -54,7 +54,10 @@
                 placeholder="Search quotes, customers or reference"
               />
             </div>
-            <div id="quote-list" class="quote-list-cards"><div class="empty">Loading quotations…</div></div>
+            <div class="quote-table-wrap"><table class="quote-list-table"><thead><tr>
+              <th class="quote-check-column"><input id="quote-select-all" type="checkbox" aria-label="Select all quotes" /></th>
+              <th>Date</th><th>Quote number</th><th>Reference number</th><th>Customer name</th><th>Status</th><th>Amount</th><th class="quote-header-search" aria-label="Search">⌕</th>
+            </tr></thead><tbody id="quote-list"><tr><td colspan="8" class="empty">Loading quotations…</td></tr></tbody></table></div>
           </section>
           <section class="quote-selected-panel" id="quote-selected-panel" hidden>
             <div class="quote-selected-view" id="quote-selected-view" hidden>
