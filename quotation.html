@@ -65,11 +65,12 @@
                     <th>Customer name</th>
                     <th>Status</th>
                     <th>Amount</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="quote-list">
                   <tr>
-                    <td colspan="7" class="empty">Loading quotations…</td>
+                    <td colspan="8" class="empty">Loading quotations…</td>
                   </tr>
                 </tbody>
               </table>
@@ -103,10 +104,10 @@
           ? shown
               .map(
                 (q) =>
-                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html?id=${encodeURIComponent(q.id)}">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td></tr>`,
+                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="new-quotation.html?id=${encodeURIComponent(q.id)}">${q.quote_number || "—"}</a></td><td>${q.reference_number || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td><td><a class="secondary button-link quote-invoice-button" href="new-invoice.html?quote_id=${encodeURIComponent(q.id)}">Create invoice</a></td></tr>`,
               )
               .join("")
-          : '<tr><td colspan="7" class="empty">No quotations found.</td></tr>';
+          : '<tr><td colspan="8" class="empty">No quotations found.</td></tr>';
       }
       fetch("/api/quotations")
         .then((r) => r.json())
@@ -116,7 +117,7 @@
         })
         .catch(() => {
           list.innerHTML =
-            '<tr><td colspan="7" class="empty">Unable to load quotations.</td></tr>';
+            '<tr><td colspan="8" class="empty">Unable to load quotations.</td></tr>';
         });
       filter.addEventListener("input", drawQuotes);
     </script>
