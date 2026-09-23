@@ -21,9 +21,9 @@
   function openQuote(id) {
     selectedId = String(id);
     loadedQuote = null;
-    $("quote-selected-panel").classList.add("has-selection");
+    $("quote-workspace").classList.add("has-selection");
+    $("quote-selected-panel").hidden = false;
     $("quote-selected-view").hidden = false;
-    document.querySelector(".quote-selected-empty").hidden = true;
     $("quote-heading").textContent = "Loading quote…";
     preview.removeAttribute("srcdoc");
     drawQuotes();
@@ -50,7 +50,7 @@
 
   list.addEventListener("click", (event) => { const button = event.target.closest("[data-quote-id]"); if (button) openQuote(button.dataset.quoteId); });
   filter.addEventListener("input", drawQuotes);
-  $("quote-close").onclick = () => { selectedId = null; loadedQuote = null; $("quote-selected-panel").classList.remove("has-selection"); $("quote-selected-view").hidden = true; document.querySelector(".quote-selected-empty").hidden = false; const url = new URL(location.href); url.searchParams.delete("id"); history.replaceState({}, "", url); drawQuotes(); };
+  $("quote-close").onclick = () => { selectedId = null; loadedQuote = null; $("quote-workspace").classList.remove("has-selection"); $("quote-selected-view").hidden = true; $("quote-selected-panel").hidden = true; const url = new URL(location.href); url.searchParams.delete("id"); history.replaceState({}, "", url); drawQuotes(); };
   $("quote-print").onclick = () => preview.contentWindow?.print();
   $("quote-pdf-mode").onclick = () => { preview.classList.add("quote-preview-focus"); $("quote-pdf-mode").classList.add("active"); $("quote-details-mode").classList.remove("active"); };
   $("quote-details-mode").onclick = () => { preview.classList.remove("quote-preview-focus"); $("quote-details-mode").classList.add("active"); $("quote-pdf-mode").classList.remove("active"); };

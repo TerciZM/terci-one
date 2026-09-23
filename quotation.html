@@ -46,7 +46,7 @@
           <a class="primary button-link" href="new-quotation.html">＋ New</a>
         </header>
         <section class="content quote-list-content">
-          <section class="quote-workspace">
+          <section class="quote-workspace" id="quote-workspace">
           <section class="panel quote-list-panel">
             <div class="quote-list-toolbar">
               <span class="toolbar-filter">☷</span><input
@@ -56,8 +56,7 @@
             </div>
             <div id="quote-list" class="quote-list-cards"><div class="empty">Loading quotations…</div></div>
           </section>
-          <section class="quote-selected-panel" id="quote-selected-panel">
-            <div class="quote-selected-empty"><span>▤</span><strong>Select a quote to preview it</strong><p>The quote preview and actions will appear here.</p></div>
+          <section class="quote-selected-panel" id="quote-selected-panel" hidden>
             <div class="quote-selected-view" id="quote-selected-view" hidden>
               <header class="quote-selected-heading"><h2 id="quote-heading">Quote</h2><button type="button" id="quote-close" aria-label="Close quote preview">×</button></header>
               <div class="quote-detail-toolbar"><div class="quote-detail-actions">
