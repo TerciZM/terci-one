@@ -33,7 +33,7 @@ export async function onRequestGet({ env, request }) {
     if (!quote)
       return Response.json({ error: "Quotation not found" }, { status: 404 });
     const lines = await env.DB.prepare(
-      "SELECT l.*, i.name, i.description AS item_description FROM quotation_lines l LEFT JOIN items i ON i.id=l.item_id WHERE l.quotation_id = ? ORDER BY l.id",
+      "SELECT l.*, i.name, i.description AS item_description, CASE WHEN NULLIF(TRIM(i.description),'') IS NOT NULL AND TRIM(i.description)<>TRIM(COALESCE(i.name,'')) THEN i.description WHEN NULLIF(TRIM(l.description),'') IS NOT NULL AND TRIM(l.description)<>TRIM(COALESCE(i.name,'')) THEN l.description ELSE '' END AS invoice_description FROM quotation_lines l LEFT JOIN items i ON i.id=l.item_id WHERE l.quotation_id = ? ORDER BY l.id",
     )
       .bind(id)
       .all();
