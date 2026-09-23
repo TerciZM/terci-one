@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quote · Terci One</title>
+    <link rel="icon" type="image/png" href="terci-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar">‹</button>
+        <div class="brand"><div class="brand-mark">T</div><div><strong>Terci One</strong><small>Business platform</small></div></div>
+        <nav>
+          <a href="index.html">Dashboard</a>
+          <details class="nav-section" open><summary><span class="nav-section-icon">▣</span>Sales</summary><div class="nav-submenu">
+            <a href="customers.html">Customers</a><a class="active quote-nav" href="quotation.html">Quotations <span>＋</span></a><a href="invoices.html">Invoices</a><a href="#sales-receipts">Sales Receipts</a><a href="#recurring-invoices">Recurring Invoices</a><a href="#payments-received">Payments Received</a><a href="#credit-notes">Credit Notes</a>
+          </div></details>
+          <a href="items.html">Items &amp; Services</a><a href="#suppliers">Suppliers</a><a href="#purchasing">Purchases</a><a href="#expenses">Expenses</a><a href="#reports">Reports</a>
+        </nav><div class="sidebar-footer">Terci Communications Limited</div>
+      </aside>
+      <main class="main quote-detail-main">
+        <header class="topbar quote-detail-topbar">
+          <div><span class="eyebrow">SALES / QUOTATIONS</span><h1 id="quote-heading">Quote</h1></div>
+          <a class="secondary button-link" href="quotation.html">← All quotes</a>
+        </header>
+        <section class="quote-detail-toolbar">
+          <div class="quote-detail-actions"><a id="quote-edit" class="secondary button-link" href="#">Edit</a><button id="quote-email" class="secondary" type="button">✉ Email</button><button id="quote-print" class="secondary" type="button">▧ PDF / Print</button><a id="quote-invoice" class="secondary button-link" href="#">Convert to invoice</a><button id="quote-more" class="secondary" type="button">…</button></div>
+        </section>
+        <section class="quote-next-banner"><span>✦</span><strong>WHAT'S NEXT?</strong><span>Go ahead and email this quote to your customer or simply mark it as sent.</span><button id="quote-send" class="primary" type="button">Send quote</button><button id="quote-mark-sent" class="secondary" type="button">Mark as sent</button></section>
+        <section class="quote-detail-card panel">
+          <div class="quote-detail-tabs"><button class="active" type="button">Quote details</button><button type="button" disabled>Activity</button><span class="quote-detail-mode"><button id="quote-details-mode" class="active" type="button">Details</button><button id="quote-pdf-mode" type="button">PDF</button></span></div>
+          <div id="quote-status-ribbon" class="quote-status-ribbon">Draft</div>
+          <div id="quote-summary-meta" class="quote-summary-meta"></div>
+          <div class="quote-preview-shell"><iframe id="quote-preview" title="Customer quotation preview"></iframe><div id="quote-loading" class="quote-view-loading">Loading quote…</div></div>
+        </section>
+      </main>
+    </div>
+    <script src="app.js"></script><script src="quote-view.js"></script>
+  </body>
+</html>

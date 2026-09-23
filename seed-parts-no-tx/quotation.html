@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All quotes · Terci One</title>
+    <link rel="icon" type="image/png" href="terci-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar">‹</button>
+        <div class="brand">
+          <div class="brand-mark">T</div>
+          <div><strong>Terci One</strong><small>Business platform</small></div>
+        </div>
+        <nav>
+          <a href="index.html">Dashboard</a>
+          <details class="nav-section" open>
+            <summary><span class="nav-section-icon">▣</span>Sales</summary>
+            <div class="nav-submenu">
+              <a href="customers.html">Customers</a>
+              <a class="active quote-nav" href="quotation.html">Quotations <span>＋</span></a>
+              <a href="invoices.html">Invoices</a>
+              <a href="#sales-receipts">Sales Receipts</a>
+              <a href="#recurring-invoices">Recurring Invoices</a>
+              <a href="#payments-received">Payments Received</a>
+              <a href="#credit-notes">Credit Notes</a>
+            </div>
+          </details>
+          <a href="#items">Items &amp; Services</a>
+          <a href="#suppliers">Suppliers</a>
+          <a href="#purchasing">Purchases</a>
+          <a href="#expenses">Expenses</a>
+          <a href="#reports">Reports</a>
+        </nav>
+        <div class="sidebar-footer">Terci Communications Limited</div>
+      </aside>
+      <main class="main">
+        <header class="topbar quote-list-topbar">
+          <div>
+            <span class="eyebrow">SALES</span>
+            <h1>All Quotes <span class="title-chevron">⌄</span></h1>
+          </div>
+          <a class="primary button-link" href="new-quotation.html">＋ New</a>
+        </header>
+        <section class="content quote-list-content">
+          <section class="panel quote-list-panel">
+            <div class="quote-list-toolbar">
+              <span class="toolbar-filter">☷</span
+              ><input
+                id="quote-filter"
+                placeholder="Search quotes, customers or reference"
+              />
+            </div>
+            <div class="table-wrap">
+              <table class="quote-list-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Date</th>
+                    <th>Quote number</th>
+                    <th>Reference number</th>
+                    <th>Customer name</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="quote-list">
+                  <tr>
+                    <td colspan="8" class="empty">Loading quotations…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script src="app.js"></script>
+    <script>
+      const list = document.getElementById("quote-list"),
+        filter = document.getElementById("quote-filter");
+      let quotes = [];
+      const qmoney = (n) =>
+        "K" +
+        Number(n || 0).toLocaleString("en-ZM", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      function drawQuotes() {
+        const term = (filter.value || "").toLowerCase();
+        const shown = quotes.filter((q) =>
+          [q.quote_number, q.customer_name, q.reference_number, q.status].some(
+            (v) =>
+              String(v || "")
+                .toLowerCase()
+                .includes(term),
+          ),
+        );
+        list.innerHTML = shown.length
+          ? shown
+              .map(
+                (q) =>
+                  `<tr><td><input type="checkbox"></td><td>${q.quote_date || "—"}</td><td><a href="quote-view.html?id=${encodeURIComponent(q.id)}">${q.quote_number || "—"}</a></td><td>${q.reference_number || q.subject || "—"}</td><td>${q.customer_name || "—"}</td><td><span class="quote-status ${String(q.status || "DRAFT").toLowerCase()}">${q.status || "DRAFT"}</span></td><td>${qmoney(q.total)}</td><td><a class="secondary button-link quote-invoice-button" href="new-invoice.html?quote_id=${encodeURIComponent(q.id)}">Create invoice</a></td></tr>`,
+              )
+              .join("")
+          : '<tr><td colspan="8" class="empty">No quotations found.</td></tr>';
+      }
+      fetch("/api/quotations")
+        .then((r) => r.json())
+        .then((a) => {
+          quotes = Array.isArray(a) ? a : [];
+          drawQuotes();
+        })
+        .catch(() => {
+          list.innerHTML =
+            '<tr><td colspan="8" class="empty">Unable to load quotations.</td></tr>';
+        });
+      filter.addEventListener("input", drawQuotes);
+    </script>
+  </body>
+</html>

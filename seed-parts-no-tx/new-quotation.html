@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New quotation · Terci One</title>
+    <link rel="icon" type="image/png" href="terci-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar">‹</button>
+        <div class="brand">
+          <div class="brand-mark">T</div>
+          <div><strong>Terci One</strong><small>Business platform</small></div>
+        </div>
+        <nav>
+          <a href="index.html">Dashboard</a>
+          <details class="nav-section" open>
+            <summary><span class="nav-section-icon">▣</span>Sales</summary>
+            <div class="nav-submenu">
+              <a href="customers.html">Customers</a>
+              <a class="active" href="quotation.html">Quotations <span>＋</span></a>
+              <a href="invoices.html">Invoices</a>
+              <a href="#sales-receipts">Sales Receipts</a>
+              <a href="#recurring-invoices">Recurring Invoices</a>
+              <a href="#payments-received">Payments Received</a>
+              <a href="#credit-notes">Credit Notes</a>
+            </div>
+          </details>
+          <a href="#items">Items &amp; Services</a>
+          <a href="#suppliers">Suppliers</a>
+          <a href="#purchasing">Purchases</a>
+          <a href="#expenses">Expenses</a>
+          <a href="#reports">Reports</a>
+        </nav>
+        <div class="sidebar-footer">Terci Communications Limited</div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">QUOTATIONS</span>
+            <h1>Create quotation</h1>
+          </div>
+          <a class="secondary button-link" href="quotation.html"
+            >← All quotes</a
+          >
+        </header>
+        <section class="content">
+          <section class="panel quotation-editor">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">NEW QUOTE</span>
+                <h2>Customer details</h2>
+                <p>
+                  Prepare a professional quote while keeping your internal costs
+                  protected.
+                </p>
+              </div>
+            </div>
+            <div class="form-grid quote-meta">
+              <label
+                >Customer
+                <div class="search-field">
+                  <input
+                    id="customer-search"
+                    placeholder="Search customer name"
+                  /><span>⌕</span>
+                </div>
+                <small>Start typing to find a customer</small></label
+              ><label>Quote number<input id="quote-number" /></label
+              ><label>Quote date<input type="date" /></label
+              ><label
+                >Validity<select>
+                  <option>30 days</option>
+                  <option>60 days</option>
+                  <option>90 days</option>
+                </select></label
+              >
+            </div>
+            <label class="quote-subject">Subject<input id="quote-subject" placeholder="What is this quotation for?" /></label>
+            <div class="items-head">
+              <div>
+                <h3>Quotation items</h3>
+                <p>
+                  Items come from storage. Search and select an item to add it.
+                </p>
+              </div>
+            </div>
+            <div class="item-search search-field">
+              <input id="item-search" placeholder="Search stored items" /><span
+                >⌕</span
+              >
+            </div>
+            <small class="helper"
+              >Select an item to add it to the quotation</small
+            >
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Selling price</th>
+                    <th class="cost">Internal cost</th>
+                    <th class="profit">Profit</th>
+                  </tr>
+                </thead>
+                <tbody id="lines">
+                  <tr>
+                    <td colspan="5" class="empty">
+                      No items added yet. Search for an item above.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <section class="additional-costs">
+              <div class="additional-costs-head">
+                <h3>Additional costs</h3>
+                <p>
+                  Capture transport, labour, or other internal costs separately.
+                </p>
+              </div>
+              <button
+                class="secondary additional"
+                onclick="addAdditionalCost()"
+              >
+                ＋ Add additional cost line
+              </button>
+            </section>
+            <div class="quote-actions">
+              <button class="primary" onclick="alert('Quotation saved')">
+                Save quotation</button
+              ><button class="secondary" onclick="previewCustomerCopy()">
+                Preview / Download PDF
+              </button>
+            </div>
+          </section>
+          <aside class="quote-summary panel">
+            <h2>Quotation summary</h2>
+            <div class="summary-row">
+              <span>Subtotal</span><strong>K0.00</strong>
+            </div>
+            <div class="summary-row">
+              <span>Additional costs</span><strong>K0.00</strong>
+            </div>
+            <div class="summary-row internal-row">
+              <span>Profit</span><strong>K0.00</strong>
+            </div>
+            <div class="summary-total">
+              <span>Total</span><strong>K0.00</strong>
+            </div>
+            <div class="internal-note">
+              <strong>Internal view</strong>
+              <p>
+                Cost and profit are visible only to authorised Terci users and
+                will not appear on the customer quotation.
+              </p>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="app.js"></script>
+    <script>
+      function addAdditionalCost() {
+        const row = document.createElement("tr");
+        row.innerHTML =
+          '<td colspan="3"><input placeholder="Additional cost description"></td><td class="cost"><input placeholder="K0.00"></td><td class="profit">—</td>';
+        document.getElementById("lines").appendChild(row);
+      }
+    </script>
+  </body>
+</html>
