@@ -159,6 +159,8 @@ function buildCustomerQuoteHTML(quote) {
   const formatDate = value => Number.isNaN(value.getTime()) ? "" : value.toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"});
   const subtotal = quote.rows.reduce((sum,r) => sum + Number(r.quantity ?? 1)*Number(r.selling_price || 0),0);
   const charges = Number(quote.additionalCharges || 0);
+  const actionBar = quote.embedded ? "" : '<div class="actions"><button onclick="window.print()">Print / Save PDF</button></div>';
+  const embeddedStyles = quote.embedded ? '<style>body{background:#fff}.page{width:100%;min-height:297mm;margin:0;padding:12mm}.actions{display:none}</style>' : "";
   return `<!doctype html><html><head><meta charset="utf-8"><link rel="icon" type="image/png" href="${esc(quote.logoUrl)}"><title>${esc(quote.number)}</title><style>
   @page{size:A4;margin:16mm}
   *{box-sizing:border-box}body{margin:0;background:#eef1f3;color:#333;font:10px Arial,sans-serif;line-height:1.4}
@@ -172,7 +174,7 @@ function buildCustomerQuoteHTML(quote) {
   .quote-footer{margin-top:auto;padding-top:8mm;break-inside:avoid;flex-shrink:0}.footer-box{border:1px solid #bfc7cc;padding:5mm}.bottom{display:flex;justify-content:space-between;gap:10mm;margin-top:0;break-inside:avoid}.bank{width:48%;line-height:1.5}.totals{width:40%;margin:3mm 0 0 auto;break-inside:avoid;flex-shrink:0}.totals div{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd}.totals .grand{font-weight:bold;font-size:11px}
   .terms{width:52%;margin:0;padding-left:5mm;border-left:1px solid #ddd;break-inside:avoid}.terms h3{font-size:10px;font-weight:400;margin:0 0 6px}.terms p{margin:0}
   @media print{body{background:white}.actions{display:none}.page{width:auto;min-height:264mm;margin:0;padding:0}.items th,.items td{padding:5px 7px}.items small{font-size:8px}.header{min-height:50mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  </style></head><body><div class="actions"><button onclick="window.print()">Print / Save PDF</button></div><main class="page">
+  </style>${embeddedStyles}</head><body>${actionBar}<main class="page">
   <header class="header"><img class="logo" src="${esc(quote.logoUrl)}" alt="Terci Communications Limited"><div class="company"><strong>Terci Communications Limited (Z)</strong><br>11401<br>Kitwe West<br>Kitwe Copperbelt 10101<br>Zambia<br>+260972888575<br>info@terci.net</div></header>
   <h1 class="title">QUOTE</h1><section class="meta"><div class="bill">Bill To<br><strong>${esc(quote.customer.name)}</strong>${quote.customer.address ? '<br>'+esc(quote.customer.address).replace(/\r?\n/g,'<br>') : ''}</div><table><tr><td>Quote#</td><td>${esc(quote.number)}</td></tr><tr><td>Quote Date</td><td>${formatDate(date)}</td></tr><tr><td>Expiry Date</td><td>${formatDate(expiry)}</td></tr></table></section>
   <section class="subject">Subject :<p>${esc(quote.subject || quote.rows.map(r=>r.name || r.description).filter(Boolean).join(', '))}</p></section>
