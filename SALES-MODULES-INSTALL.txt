@@ -1,16 +1,17 @@
-TERCI ONE — SALES MODULES UPDATE
-
-Includes Recurring Invoices, Payments Received, and Credit Notes.
+TERCI ONE — SALES & PURCHASES MODULES UPDATE
 
 INSTALL
-1. Extract this ZIP over the root of the Terci One Pages repository, preserving folders. It replaces the existing navigation links and styles and adds the new module pages and API routes.
-2. In the Cloudflare D1 console for the app's existing database, run sales-modules-migration.sql once. It is safe to run again. The app already needs customers, items, and invoices tables.
-3. Commit and deploy the updated repository through Cloudflare Pages.
+1. Extract this ZIP into the root of the Terci One repository, preserving its folders. Allow the included files to replace matching files.
+2. In Cloudflare D1, run sales-modules-migration.sql against the app database. It is safe to rerun and adds the Recurring Invoices, Credit Notes, Vendors and Expenses tables. It expects the existing customers, items and invoices tables.
+3. Commit and deploy through Cloudflare Pages.
 
-WHAT'S INCLUDED
-- Recurring invoice profiles with customer, schedule, terms, items, pause/resume, and a Generate action that creates an invoice with the saved descriptions and prices.
-- Payments Received register backed by the existing sales receipt records. Record Payment opens the existing receipt form; receipt detail remains printable.
-- Credit note create/edit, issue, invoice balance application with over-credit validation, and a printable credit note view.
-- Sales sidebar links updated across the app.
+INCLUDED
+- Sales modules: recurring invoice profiles and manual invoice generation, Payments Received register, issued credit notes and printable credit note view.
+- Purchases navigation with Vendors and Expenses nested under it.
+- Vendor create, edit, search, status filtering, addresses, contact persons, payment details, reporting tags and remarks.
+- Expense create, edit, search, pagination, vendor/customer association, account category, tax, paid-through method and billable flag.
 
-Recurring invoice generation is currently user-triggered from the profile list. It does not run unattended on a schedule; Cloudflare Pages does not run scheduled jobs by itself.
+LIMITS
+- Recurring invoice generation is user-triggered from its profile list; unattended generation needs a scheduled job.
+- Receipt file uploads and automated receipt extraction are not included because persistent file storage is not configured in this app.
+- Vendor payables and unused credits display zero until supplier bills and vendor credits are added.
