@@ -1,0 +1,16 @@
+TERCI ONE — SALES MODULES UPDATE
+
+Includes Recurring Invoices, Payments Received, and Credit Notes.
+
+INSTALL
+1. Extract this ZIP over the root of the Terci One Pages repository, preserving folders. It replaces the existing navigation links and styles and adds the new module pages and API routes.
+2. In the Cloudflare D1 console for the app's existing database, run sales-modules-migration.sql once. It is safe to run again. The app already needs customers, items, and invoices tables.
+3. Commit and deploy the updated repository through Cloudflare Pages.
+
+WHAT'S INCLUDED
+- Recurring invoice profiles with customer, schedule, terms, items, pause/resume, and a Generate action that creates an invoice with the saved descriptions and prices.
+- Payments Received register backed by the existing sales receipt records. Record Payment opens the existing receipt form; receipt detail remains printable.
+- Credit note create/edit, issue, invoice balance application with over-credit validation, and a printable credit note view.
+- Sales sidebar links updated across the app.
+
+Recurring invoice generation is currently user-triggered from the profile list. It does not run unattended on a schedule; Cloudflare Pages does not run scheduled jobs by itself.
