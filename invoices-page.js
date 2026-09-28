@@ -14,3 +14,4 @@ $("invoice-view-toggle").onclick=()=>$("invoice-view").classList.toggle("open");
 $("invoice-list").onclick=async e=>{const id=Number(e.target.dataset.statusId),del=Number(e.target.dataset.deleteInvoice);if(id&&confirm(`${e.target.dataset.status} this invoice?`))await patchStatus(id,e.target.dataset.status);if(del&&confirm('Delete this invoice?')){const r=await fetch(`/api/invoices?id=${del}`,{method:'DELETE'}),data=await r.json();if(!r.ok)return alert(data.error||'Could not delete invoice');await load()}};
 load();
 })();
+

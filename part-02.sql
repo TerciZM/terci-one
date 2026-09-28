@@ -40,3 +40,4 @@ INSERT INTO customers (name,email,phone,address) VALUES ('Mr. Chimwewe Kabamba',
 INSERT INTO customers (name,email,phone,address) VALUES ('Sharon Nkunika','sharonkunika@gmail.com','''+260 977872459','Mbereshi Way, Leopard’s hill road, Lusaka, Zambia');
 INSERT INTO customers (name,email,phone,address) VALUES ('Mpifi Ltd',NULL,'260 972526683','Chililabombwe, Zambia');
 COMMIT;
+

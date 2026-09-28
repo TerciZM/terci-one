@@ -39,3 +39,4 @@
   };
   const today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); $("receipt-date").value = today.toISOString().slice(0, 10); updateReceiptNumber();
 })();
+

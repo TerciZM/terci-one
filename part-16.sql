@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Dahua 
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Installation Accessories - (RJ45/Jackets/Cable Ties/Trunking)',NULL,2250.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Dahua 4MP Outdoor Network Bullet Camera',NULL,3600.0,0.0);
 COMMIT;
+

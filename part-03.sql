@@ -40,3 +40,4 @@ INSERT INTO customers (name,email,phone,address) VALUES ('Shaarz Cosmetics Kitwe
 INSERT INTO customers (name,email,phone,address) VALUES ('Fraser Alexander',NULL,'''+260966681075','Chingola, Zambia');
 INSERT INTO customers (name,email,phone,address) VALUES ('Chibesa Nyimbili','nyimbilichibeza@yahoo.com','0976521243','Lusaka, Zambia');
 COMMIT;
+

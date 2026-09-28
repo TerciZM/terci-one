@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Cable 
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Emergency Break Glass','Glass Break Green Call Point Resettable - FR02',1200.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('No Touch Exit Button','Exit Sensor No Touch - SW165',1500.0,0.0);
 COMMIT;
+

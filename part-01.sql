@@ -40,3 +40,4 @@ INSERT INTO customers (name,email,phone,address) VALUES ('Family Legacy Internat
 INSERT INTO customers (name,email,phone,address) VALUES ('Buntingwa Resources Limited',NULL,NULL,'Kitwe, Zambia');
 INSERT INTO customers (name,email,phone,address) VALUES ('Mr. Vincent Nyirenda','tymuorigins@gmail.com',NULL,'kalulushi, Zambia');
 COMMIT;
+

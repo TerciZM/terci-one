@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hikvis
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hikvision PTZ 150m IP',NULL,11400.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hikvision PTZ 100m Analogue',NULL,7200.0,0.0);
 COMMIT;
+

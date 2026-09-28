@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Yealin
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Fanvil Phones 2SIP',NULL,2500.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Installation of Starlink',NULL,2000.0,0.0);
 COMMIT;
+

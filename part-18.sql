@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hik IP
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('MikroTik RB1100AHx4 Router','1100x4 4-cores 1.4Ghz 1Gb RAM 13xGbit LAN',9500.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Fiber Termination Accessories',NULL,150.0,0.0);
 COMMIT;
+

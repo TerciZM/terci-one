@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Screen
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Installation of Radios (Client Radios)',NULL,2500.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Installation of Access Point Radios',NULL,3500.0,0.0);
 COMMIT;
+

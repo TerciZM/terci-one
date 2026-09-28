@@ -53,3 +53,4 @@ CREATE TABLE IF NOT EXISTS quotation_additional_costs (
 );
 CREATE INDEX IF NOT EXISTS idx_quotations_created_at ON quotations(created_at);
 CREATE INDEX IF NOT EXISTS idx_items_name ON items(name);
+

@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Intrud
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('HIkvision 32 Channel Analogue','32 Channel DVR with no HardDrive',10700.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hikvision Analogue Clearvue 60mm Camera',NULL,750.0,0.0);
 COMMIT;
+

@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Push t
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('UPS Batteries',NULL,850.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Panasonic PBX','Panasonic KX-TES824 Advanced HyBrid PABX Telephone System with 8Co Lines and 24 Extensions',12000.0,0.0);
 COMMIT;
+

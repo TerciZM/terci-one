@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Tensio
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Down Lead Clamp',NULL,50.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Fiber Storage Unit',NULL,900.0,0.0);
 COMMIT;
+

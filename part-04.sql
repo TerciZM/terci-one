@@ -40,3 +40,4 @@ INSERT INTO customers (name,email,phone,address) VALUES ('Zhongmei',NULL,NULL,NU
 INSERT INTO customers (name,email,phone,address) VALUES ('Martha Cousin',NULL,NULL,NULL);
 INSERT INTO customers (name,email,phone,address) VALUES ('Chibesakunda Residence',NULL,NULL,NULL);
 COMMIT;
+

@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Trunki
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Floor trunking',NULL,420.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Fiber cabe PVC duct roll',NULL,1800.0,0.0);
 COMMIT;
+

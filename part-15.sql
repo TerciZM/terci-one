@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Instal
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Camera Cleaning and Inspection',NULL,150.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Materials Used for Repair','''-Pair for CCTV Balun X 2  -20m UTP Cable',300.0,0.0);
 COMMIT;
+

@@ -1,0 +1,1 @@
+(async()=>{try{const r=await fetch('/api/settings');if(!r.ok)return;const s=await r.json(),brand=s['organization.branding']||{};if(brand.accent&&/^#[0-9a-f]{6}$/i.test(brand.accent))document.documentElement.style.setProperty('--red',brand.accent);document.documentElement.dataset.appearance=brand.appearance==='dark'?'dark':'light'}catch(_){}})();

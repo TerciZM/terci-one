@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('PVC 3 
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Adhesive Silicon (20 Pieces)',NULL,0.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Cable ties T400',NULL,0.0,0.0);
 COMMIT;
+

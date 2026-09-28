@@ -21,3 +21,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Cambiu
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Cambium ePMP Force 300-16',NULL,5500.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Camera and cable setup',NULL,400.0,0.0);
 COMMIT;
+

@@ -40,3 +40,4 @@ INSERT INTO customers (name,email,phone,address) VALUES ('Julius Chimasa',NULL,'
 INSERT INTO customers (name,email,phone,address) VALUES ('University of Edenberg',NULL,NULL,'Kitwe, Zambia');
 INSERT INTO customers (name,email,phone,address) VALUES ('Power Drive Transmission Supplies Ltd',NULL,NULL,'Kitwe, Zambia');
 COMMIT;
+

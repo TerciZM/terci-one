@@ -40,3 +40,4 @@ INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Weathe
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Cambium Radios Pair 450i','point 2 point Radios',8000.0,0.0);
 INSERT INTO items (name,description,selling_price,internal_cost) VALUES ('Hikvision Analogue Set of 4 with 8 Channel DVR',NULL,6500.0,0.0);
 COMMIT;
+

@@ -1,0 +1,13 @@
+TERCI ONE — SETTINGS CENTER AND REPORTS UPDATE
+
+The package contains the current app files, a Zoho-style Settings Center, and the Reports Center update.
+
+DEPLOY
+1. Extract the ZIP into the root of the Terci One GitHub repository, keeping the functions/ folder structure.
+2. In the Cloudflare D1 console for the Terci One database, run settings-migration.sql once. It is safe to rerun.
+3. Deploy through the existing Cloudflare Pages workflow.
+4. Open https://terci-one.pages.dev/settings.html after deployment.
+
+The Settings Center saves organization profile and business preferences to D1. The branding accent and light/dark appearance are applied across the app. Currency/date defaults, payment terms, tax labels, reminders, email notification preferences, and sales/purchase defaults are stored for configuration; wiring each default into its transaction workflow can be done as a follow-up. User sign-in and roles, ledger opening balances, online gateways, and external email sending are not configured in this app yet; those pages explain their current status.
+
+Reports Center: searchable report categories, saved data reports, date ranges, CSV export, and print. Reports requiring their modules use the corresponding existing D1 tables.

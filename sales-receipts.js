@@ -15,3 +15,4 @@
   search.oninput = draw; methodFilter.onchange = draw;
   fetch("/api/sales-receipts").then((r) => r.ok ? r.json() : Promise.reject(new Error("Could not load sales receipts"))).then((data) => { receipts = Array.isArray(data) ? data : []; draw(); }).catch((error) => { body.innerHTML = `<tr><td colspan="9" class="empty">${error.message}</td></tr>`; $("receipt-count").textContent = "Unable to load receipts"; });
 })();
+
