@@ -7,7 +7,7 @@
   async function updateReceiptNumber() { const date = $("receipt-date").value; if (!date) return; try { const data = await get(`/api/sales-receipts?date=${encodeURIComponent(date)}`); $("receipt-number").value = data.receipt_number; } catch (_) { $("receipt-number").value = "Generated when saved"; } }
   function paintInvoices() {
     const select = $("receipt-invoice");
-    select.innerHTML = '<option value="">Direct / unallocated receipt</option>' + invoices.filter((i) => Number(i.balance_due ?? (Number(i.total || 0) - Number(i.amount_paid || 0))) > 0.005).map((i) => `<option value="${i.id}">${esc(i.invoice_number)} · ${esc(i.invoice_date)} · balance ${money(i.balance_due ?? (i.total - (i.amount_paid || 0)))}</option>`).join("");
+    select.innerHTML = '<option value="">Direct / unallocated receipt</option>' + invoices.map((i) => `<option value="${i.id}">${esc(i.invoice_number)} · ${esc(i.invoice_date)} · balance ${money(i.balance_due ?? (i.total - (i.amount_paid || 0)))}</option>`).join("");
   }
   function searchMenu(results, input, choose) {
     document.querySelector(".receipt-suggestions")?.remove();
@@ -19,13 +19,13 @@
   $("receipt-customer").oninput = async (event) => {
     customer = null; invoices = []; paintInvoices(); $("receipt-customer-help").textContent = "Start typing to search customers"; $("receipt-invoice-help").textContent = "Choose an invoice to apply this payment to its balance.";
     const term = event.target.value.trim(); if (term.length < 1) return;
-    try { const results = await get(`/api/customers?q=${encodeURIComponent(term)}`); searchMenu(results, event.target, (record) => { customer = record; event.target.value = record.name; $("receipt-customer-help").textContent = "Customer selected ✓"; get("/api/invoices").then((all) => { invoices = all.filter((invoice) => Number(invoice.customer_id) === Number(record.id)); paintInvoices(); }).catch((error) => { $("receipt-invoice-help").textContent = error.message; }); }); } catch (error) { alert(error.message); }
+    try { const results = await get(`/api/customers?q=${encodeURIComponent(term)}`); searchMenu(results, event.target, (record) => { customer = record; event.target.value = record.name; $("receipt-customer-help").textContent = "Customer selected ✓"; get(`/api/invoices?customer_id=${encodeURIComponent(record.id)}&outstanding=1`).then((all) => { invoices = all; paintInvoices(); $("receipt-invoice-help").textContent = invoices.length ? "Select an open invoice; its balance will update after you save this receipt." : "This customer has no outstanding invoices. You can still record a direct / unallocated receipt."; }).catch((error) => { $("receipt-invoice-help").textContent = error.message; }); }); } catch (error) { alert(error.message); }
   };
   $("receipt-invoice").onchange = () => {
     const invoice = invoices.find((item) => String(item.id) === $("receipt-invoice").value);
-    if (!invoice) { $("receipt-amount").value = ""; $("receipt-amount").readOnly = false; $("receipt-amount-help").textContent = "Enter the amount received."; return; }
+    if (!invoice) { $("receipt-amount").value = ""; $("receipt-amount").readOnly = false; $("receipt-amount-help").textContent = "Enter the amount received. Without an invoice, the receipt will remain unallocated."; return; }
     const balance = Number(invoice.balance_due ?? (Number(invoice.total || 0) - Number(invoice.amount_paid || 0)));
-    $("receipt-amount").value = balance.toFixed(2); $("receipt-amount").readOnly = false; $("receipt-amount-help").textContent = `Outstanding balance: ${money(balance)}. Enter a smaller amount for a partial payment.`;
+    $("receipt-amount").value = balance.toFixed(2); $("receipt-amount").readOnly = false; $("receipt-amount-help").textContent = `Outstanding balance: ${money(balance)}. Enter a smaller amount for a partial payment. The invoice updates when you save the receipt.`;
   };
   $("receipt-date").onchange = updateReceiptNumber;
   $("receipt-form").onsubmit = async (event) => {

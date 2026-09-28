@@ -1,0 +1,6 @@
+TERCI ONE — PAYMENT TO INVOICE LINK
+
+The Record Payment / New Sales Receipt form now loads only open invoices belonging to the selected customer. The dropdown shows invoice number, date, and outstanding balance. Selecting an invoice fills the payment amount with the remaining balance; you can reduce it for a partial payment. Saving the receipt links it to the invoice and updates amount paid, balance due, payment type, and invoice status. Draft, void, paid, and cancelled invoices are excluded. Amounts above the remaining balance are rejected. Direct / unallocated receipts remain available.
+
+INSTALL
+Replace the included files in the matching paths in the Terci One repository, then deploy through Cloudflare Pages. No database migration is required for this payment-to-invoice change. The complete application files are included for convenience. If this deployment has not yet run settings-migration.sql from the Settings update, run it once in D1.
