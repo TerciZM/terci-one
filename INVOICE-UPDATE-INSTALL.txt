@@ -1,0 +1,8 @@
+TERCI ONE — INVOICE LINE AND PAYMENT UPDATE
+
+This update fixes quote-to-invoice lines that have a description but are not linked to a catalogue item. Their description, quantity, unit and rate now carry into the invoice and can be saved without choosing a stored item. Stored item selection remains available. Empty invoice descriptions still need to be filled in.
+
+It also includes the payment-to-invoice update: the Record Payment form lists open invoices for the selected customer, pre-fills the outstanding balance, and updates the invoice balance/status when the receipt is saved. Direct/unallocated receipts remain available.
+
+INSTALL
+Extract the ZIP into the root of the Terci One repository, replace matching files, and deploy through Cloudflare Pages. No D1 migration is required for these invoice/payment changes. If this deployment has not run settings-migration.sql from the Settings Center update, run that migration once in D1.
