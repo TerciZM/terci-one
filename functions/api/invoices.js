@@ -35,7 +35,12 @@ export async function onRequestGet({env,request}) {
       const lines=await env.DB.prepare("SELECT id,item_id,description,quantity,unit_of_measure,rate,internal_cost,amount FROM invoice_lines WHERE invoice_id=? ORDER BY id").bind(id).all();
       return json({...invoice,lines:lines.results||[]});
     }
-    const result=await env.DB.prepare("SELECT i.*,c.name AS customer_name,c.company_name FROM invoices i LEFT JOIN customers c ON c.id=i.customer_id ORDER BY i.invoice_date DESC,i.id DESC LIMIT 1000").all();
+    const customerId=Number(url.searchParams.get("customer_id"))||null,outstanding=url.searchParams.get("outstanding")==="1";
+    let sql="SELECT i.*,c.name AS customer_name,c.company_name FROM invoices i LEFT JOIN customers c ON c.id=i.customer_id WHERE 1=1",args=[];
+    if(customerId){sql+=" AND i.customer_id=?";args.push(customerId)}
+    if(outstanding)sql+=" AND COALESCE(i.balance_due, i.total-COALESCE(i.amount_paid,0))>0.005 AND i.status NOT IN ('Draft','Void','Cancelled','Paid','Write Off')";
+    sql+=" ORDER BY i.invoice_date DESC,i.id DESC LIMIT 1000";
+    const result=await env.DB.prepare(sql).bind(...args).all();
     return json(result.results||[]);
   } catch(e){return json({error:e.message},500)}
 }

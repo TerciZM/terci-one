@@ -31,30 +31,40 @@ export async function onRequestPost({ env, request }) {
   try {
     const body = await request.json();
     const customerId = Number(body.customer_id), invoiceId = Number(body.invoice_id) || null;
-    const receiptDate = String(body.receipt_date || "");
-    const amount = Number(body.amount);
-    const method = String(body.payment_method || "Bank Transfer");
+    const receiptDate = String(body.receipt_date || ""), amount = Number(body.amount);
+    const method = String(body.payment_method || "Bank Transfer"), reference = String(body.payment_reference || "").trim() || null, notes = String(body.notes || "").trim() || null;
     if (!customerId) return json({ error: "Select a customer" }, 400);
     if (!receiptDate || Number.isNaN(new Date(`${receiptDate}T12:00:00`).getTime())) return json({ error: "Enter a valid receipt date" }, 400);
     if (!Number.isFinite(amount) || amount <= 0) return json({ error: "Receipt amount must be greater than zero" }, 400);
     if (!["Cash", "Bank Transfer", "Mobile Money", "Card", "Cheque", "Other"].includes(method)) return json({ error: "Choose a valid payment method" }, 400);
-    let invoice = null, invoicePaidAfter = 0, invoiceBalanceAfter = 0, invoiceStatusAfter = "";
+
+    let invoice = null;
     if (invoiceId) {
       invoice = await env.DB.prepare("SELECT id,customer_id,total,amount_paid,balance_due,status FROM invoices WHERE id=?").bind(invoiceId).first();
       if (!invoice) return json({ error: "Selected invoice was not found" }, 404);
       if (Number(invoice.customer_id) !== customerId) return json({ error: "The selected invoice belongs to a different customer" }, 400);
+      if (["Draft", "Void", "Cancelled", "Paid", "Write Off"].includes(String(invoice.status || "Unpaid"))) return json({ error: "Only an open invoice can receive a payment" }, 409);
       const balance = Math.max(0, Number(invoice.balance_due ?? (Number(invoice.total || 0) - Number(invoice.amount_paid || 0))));
+      if (balance <= 0.005) return json({ error: "This invoice has no outstanding balance" }, 409);
       if (amount > balance + 0.005) return json({ error: `Amount is greater than the invoice balance of K${balance.toFixed(2)}` }, 400);
-      invoicePaidAfter = Number(invoice.amount_paid || 0) + amount;
-      invoiceBalanceAfter = Math.max(0, Number(invoice.total || 0) - invoicePaidAfter);
-      invoiceStatusAfter = invoiceBalanceAfter <= 0.005 ? "Paid" : "Partial";
     }
+
     const receiptNumber = await nextReceiptNumber(env.DB, receiptDate);
-    const statements = [env.DB.prepare("INSERT INTO sales_receipts (receipt_number,customer_id,invoice_id,receipt_date,payment_method,payment_reference,amount,notes,status) VALUES (?,?,?,?,?,?,?,?, 'Issued')").bind(receiptNumber, customerId, invoiceId, receiptDate, method, String(body.payment_reference || "").trim() || null, amount, String(body.notes || "").trim() || null)];
-    if (invoiceId) statements.push(env.DB.prepare("UPDATE invoices SET amount_paid=?,balance_due=?,status=?,payment_type=?,payment_date=?,payment_reference=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(invoicePaidAfter, invoiceBalanceAfter, invoiceStatusAfter, invoiceStatusAfter === "Paid" ? "Full" : "Partial", receiptDate, String(body.payment_reference || "").trim() || null, invoiceId));
-    await env.DB.batch(statements);
+    if (invoiceId) {
+      // Insert the receipt only while the selected invoice still belongs to this customer and has enough balance.
+      // The paired invoice update is in the same D1 batch, so partial and full payments stay linked.
+      const insert = env.DB.prepare("INSERT INTO sales_receipts (receipt_number,customer_id,invoice_id,receipt_date,payment_method,payment_reference,amount,notes,status) SELECT ?,?,?,?,?,?,?,?,'Issued' FROM invoices i WHERE i.id=? AND i.customer_id=? AND COALESCE(i.balance_due,i.total-COALESCE(i.amount_paid,0))+0.005>=? AND COALESCE(i.status,'Unpaid') NOT IN ('Draft','Void','Cancelled','Paid','Write Off')")
+        .bind(receiptNumber, customerId, invoiceId, receiptDate, method, reference, amount, notes, invoiceId, customerId, amount);
+      const update = env.DB.prepare("UPDATE invoices SET amount_paid=MIN(COALESCE(total,0),COALESCE(amount_paid,0)+?),balance_due=MAX(0,COALESCE(total,0)-MIN(COALESCE(total,0),COALESCE(amount_paid,0)+?)),status=CASE WHEN COALESCE(total,0)-MIN(COALESCE(total,0),COALESCE(amount_paid,0)+?)<=0.005 THEN 'Paid' ELSE 'Partial' END,payment_type=CASE WHEN COALESCE(total,0)-MIN(COALESCE(total,0),COALESCE(amount_paid,0)+?)<=0.005 THEN 'Full' ELSE 'Partial' END,payment_date=?,payment_reference=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND customer_id=? AND COALESCE(balance_due,total-COALESCE(amount_paid,0))+0.005>=? AND COALESCE(status,'Unpaid') NOT IN ('Draft','Void','Cancelled','Paid','Write Off')")
+        .bind(amount, amount, amount, amount, receiptDate, reference, invoiceId, customerId, amount);
+      const results = await env.DB.batch([insert, update]);
+      if (!Number(results?.[0]?.meta?.changes)) return json({ error: "The invoice balance changed before the receipt was saved. Reload the customer’s invoices and try again." }, 409);
+    } else {
+      await env.DB.prepare("INSERT INTO sales_receipts (receipt_number,customer_id,invoice_id,receipt_date,payment_method,payment_reference,amount,notes,status) VALUES (?,?,NULL,?,?,?,?,?,'Issued')")
+        .bind(receiptNumber, customerId, receiptDate, method, reference, amount, notes).run();
+    }
     const receipt = await env.DB.prepare("SELECT id,receipt_number FROM sales_receipts WHERE receipt_number=?").bind(receiptNumber).first();
-    return json({ ok: true, ...receipt, invoice_status: invoiceStatusAfter || null }, 201);
+    const updatedInvoice = invoiceId ? await env.DB.prepare("SELECT status,amount_paid,balance_due FROM invoices WHERE id=?").bind(invoiceId).first() : null;
+    return json({ ok: true, ...receipt, invoice_status: updatedInvoice?.status || null, amount_paid: updatedInvoice?.amount_paid ?? null, balance_due: updatedInvoice?.balance_due ?? null }, 201);
   } catch (error) { return json({ error: error.message }, 500); }
 }
-
