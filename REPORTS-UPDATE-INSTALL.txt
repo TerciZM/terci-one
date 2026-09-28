@@ -1,0 +1,14 @@
+TERCI ONE — REPORTS CENTER UPDATE
+
+This update adds a Zoho-style Reports Center based on the supplied recording. It includes searchable report categories, a report viewer, date presets and custom ranges, generated tables, CSV export, and print output. The report data comes from the records already saved in the Terci One D1 database.
+
+INSTALL
+1. Extract this ZIP into the root of the Terci One GitHub repository and replace matching files.
+2. Confirm functions/api/reports.js is inside the functions/api folder.
+3. No D1 migration is required for this update.
+4. Commit and deploy the changes through the existing Cloudflare Pages workflow.
+5. Open Reports from the application sidebar.
+
+Included report types: Profit and Loss, Cash Flow Statement, Sales by Customer, Sales by Item, Sales Summary, Accounts Receivable Aging, Payments Received, Expenses by Category, Inventory Summary, Quotation Summary, Recurring Invoice Details, and Credit Notes Summary.
+
+Some report types require the corresponding application modules and their existing database tables to be deployed and migrated first. The Reports Center does not invent values for missing records.
