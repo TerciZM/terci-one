@@ -35,3 +35,4 @@ export async function onRequestDelete({env,request}){
     await env.DB.batch(ids.map(id=>env.DB.prepare("DELETE FROM items WHERE id=?").bind(id)));return json({ok:true});
   }catch(e){return json({error:e.message},500)}
 }
+

@@ -57,3 +57,4 @@ export async function onRequestPost({ env, request }) {
     return json({ ok: true, ...receipt, invoice_status: invoiceStatusAfter || null }, 201);
   } catch (error) { return json({ error: error.message }, 500); }
 }
+

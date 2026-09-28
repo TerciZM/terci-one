@@ -83,3 +83,4 @@ export async function onRequestDelete({env,request}) {
     await env.DB.batch([env.DB.prepare("DELETE FROM invoice_lines WHERE invoice_id=?").bind(id),env.DB.prepare("DELETE FROM invoices WHERE id=?").bind(id)]);return json({ok:true});
   } catch(e){return json({error:e.message},500)}
 }
+

@@ -106,3 +106,4 @@ export async function onRequestDelete({ env, request }) {
     await env.DB.batch(ids.map(id=>env.DB.prepare("DELETE FROM customers WHERE id=?").bind(id)));return Response.json({ok:true});
   } catch(e){return Response.json({error:e.message},{status:500})}
 }
+
