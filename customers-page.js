@@ -1,6 +1,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const state = { customers: [], search: "", view: "active", page: 1, size: 25, selected: new Set(), filters: {} };
+  let displayNameEdited = false;
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
   const fields = {
     "customer-salutation":"salutation", "customer-first-name":"first_name", "customer-last-name":"last_name", "customer-company":"company_name",
@@ -52,16 +53,19 @@
   async function api(url="/api/customers",options={}){const response=await fetch(url,options);let data;try{data=await response.json()}catch{data={}}if(!response.ok)throw new Error(data.error||"Customer request failed");return data}
   async function load(){try{const data=await api();state.customers=Array.isArray(data)?data:[];draw()}catch(error){$("customers").innerHTML=`<tr><td colspan="8" class="empty-state">${esc(error.message)}</td></tr>`}}
   function openForm(customer=null){
-    $("customer-editor").reset();$("customer-id").value=customer?.id||"";$("form-title").textContent=customer?"Edit customer":"New customer";
+    $("customer-editor").reset();displayNameEdited=Boolean(customer?.display_name||customer?.name);$("customer-id").value=customer?.id||"";$("form-title").textContent=customer?"Edit customer":"New customer";
     document.querySelectorAll('[name="customer-type"]').forEach(r=>r.checked=(r.value===(customer?.customer_type||"Business")));
     for(const [id,key] of Object.entries(fields)){const el=$(id);if(el)el.value=customer?.[key]??(id==="customer-currency"?"ZMW":id==="customer-language"?"English":id==="customer-status"?"Active":id==="customer-payment-terms"?"Due on Receipt":id==="customer-portal"?"0":"")}
     if(customer?.display_name==null&&customer?.name)$("customer-name").value=customer.name;
     document.querySelectorAll("[data-customer-tab]").forEach((b,i)=>b.classList.toggle("active",i===0));document.querySelectorAll("[data-customer-panel]").forEach((p,i)=>p.classList.toggle("active",i===0));
     $("customer-form").classList.add("open");$("customer-salutation").focus();
   }
+  function syncDisplayName(){if(displayNameEdited)return;const company=$("customer-company").value.trim();const personal=[$("customer-first-name").value.trim(),$("customer-last-name").value.trim()].filter(Boolean).join(" ");$("customer-name").value=company||personal}
   function closeForm(){ $("customer-form").classList.remove("open"); }
   function payload(){const body={};for(const [id,key] of Object.entries(fields)){const el=$(id);body[key]=el?el.value.trim():""}body.customer_type=selectedType();body.name=body.display_name;body.portal_enabled=Number(body.portal_enabled||0);body.opening_balance=Number(body.opening_balance||0);body.credit_limit=Number(body.credit_limit||0);return body}
   $("new-customer").onclick=()=>openForm();$("cancel-customer").onclick=closeForm;
+  ["customer-company","customer-first-name","customer-last-name"].forEach(id=>$(id).addEventListener("input",syncDisplayName));
+  $("customer-name").addEventListener("input",()=>{displayNameEdited=true});
   document.querySelectorAll('[data-close="customer-form"]').forEach(b=>b.onclick=closeForm);
   $("customer-form").addEventListener("click",e=>{if(e.target===$("customer-form"))closeForm()});
   $("customer-editor").addEventListener("submit",async e=>{e.preventDefault();const id=$("customer-id").value,body=payload();if(!body.display_name){const generated=[body.salutation,body.first_name,body.last_name].filter(Boolean).join(" ");body.display_name=generated||body.company_name;if(!body.display_name){alert("Enter a display name, company name, or contact name.");return}$("customer-name").value=body.display_name;body.name=body.display_name}
