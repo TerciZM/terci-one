@@ -9,18 +9,34 @@ const editableFields = [
 const fields = ["id",...editableFields,"created_at"].join(",");
 const legacyFields = ["id","name","company_name","email","phone","address","status","portal_enabled","template_name","created_at"];
 
-async function tableColumns(env) {
-  try {
-    const result = await env.DB.prepare("PRAGMA table_info(customers)").all();
-    return new Set((result.results || []).map(row => row.name));
-  } catch (_) {
-    return new Set(legacyFields);
+const customerColumnTypes = {
+  company_name:"TEXT", status:"TEXT DEFAULT 'Active'", portal_enabled:"INTEGER DEFAULT 0", template_name:"TEXT",
+  customer_type:"TEXT DEFAULT 'Business'", salutation:"TEXT", first_name:"TEXT", last_name:"TEXT", display_name:"TEXT", customer_number:"TEXT", mobile:"TEXT", language:"TEXT DEFAULT 'English'",
+  tax_rate:"TEXT", currency:"TEXT DEFAULT 'ZMW'", opening_balance:"REAL DEFAULT 0", credit_limit:"REAL DEFAULT 0", payment_terms:"TEXT DEFAULT 'Due on Receipt'",
+  billing_attention:"TEXT", billing_country:"TEXT", billing_address1:"TEXT", billing_address2:"TEXT", billing_city:"TEXT", billing_state:"TEXT", billing_zip:"TEXT", billing_phone:"TEXT", billing_fax:"TEXT",
+  shipping_attention:"TEXT", shipping_country:"TEXT", shipping_address1:"TEXT", shipping_address2:"TEXT", shipping_city:"TEXT", shipping_state:"TEXT", shipping_zip:"TEXT", shipping_phone:"TEXT", shipping_fax:"TEXT",
+  contact_persons:"TEXT", reporting_tags:"TEXT", remarks:"TEXT"
+};
+async function tableColumns(env,ensure=false) {
+  const read=async()=>{const result=await env.DB.prepare("PRAGMA table_info(customers)").all();return new Set((result.results||[]).map(row=>row.name))};
+  let available;try{available=await read()}catch(_){available=new Set(legacyFields)}
+  if(ensure){
+    for(const [field,type] of Object.entries(customerColumnTypes)){
+      if(available.has(field))continue;
+      try{await env.DB.prepare(`ALTER TABLE customers ADD COLUMN ${field} ${type}`).run();available.add(field)}
+      catch(error){
+        if(!/duplicate column name/i.test(String(error.message||error)))throw error;
+        available=await read();
+      }
+    }
   }
+  return available;
 }
 
 function clean(body) {
+  const salutation=String(body.salutation||"").trim()||null,firstName=String(body.first_name||"").trim()||null,lastName=String(body.last_name||"").trim()||null;
   const display = String(body.display_name || body.name || "").trim();
-  const personal = [body.salutation,body.first_name,body.last_name].filter(Boolean).join(" ").trim();
+  const personal = [salutation,firstName,lastName].filter(Boolean).join(" ").trim();
   const company = String(body.company_name || "").trim();
   const name = display || company || personal;
   const billing = [body.billing_address1,body.billing_address2,body.billing_city,body.billing_state,body.billing_country].filter(Boolean).join(", ");
@@ -32,6 +48,7 @@ function clean(body) {
     status: body.status === "Inactive" ? "Inactive" : "Active",
     portal_enabled: Number(Boolean(Number(body.portal_enabled))),
     customer_type: body.customer_type === "Individual" ? "Individual" : "Business",
+    salutation, first_name:firstName, last_name:lastName, company_name:company||null, display_name:display||name,
     language: body.language || "English",
     currency: body.currency || "ZMW",
     payment_terms: body.payment_terms || "Due on Receipt",
@@ -64,7 +81,7 @@ export async function onRequestPost({ env, request }) {
   try {
     const body=clean(await request.json());
     if(!body.name)return Response.json({error:"Display name, company name, or contact name is required"},{status:400});
-    const available=await tableColumns(env),columns=editableFields.filter(field=>available.has(field)),placeholders=columns.map(()=>"?").join(",");
+    const available=await tableColumns(env,true),columns=editableFields.filter(field=>available.has(field)),placeholders=columns.map(()=>"?").join(",");
     const result=await env.DB.prepare(`INSERT INTO customers (${columns.join(",")}) VALUES (${placeholders})`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)])).run();
     return Response.json({id:result.meta.last_row_id},{status:201});
   } catch(e){return Response.json({error:e.message},{status:500})}
@@ -74,7 +91,7 @@ export async function onRequestPut({ env, request }) {
   try {
     const body=clean(await request.json()),id=Number(body.id);
     if(!id||!body.name)return Response.json({error:"Customer ID and display name are required"},{status:400});
-    const available=await tableColumns(env),columns=editableFields.filter(field=>available.has(field)),assignments=columns.map(field=>`${field}=?`).join(",");
+    const available=await tableColumns(env,true),columns=editableFields.filter(field=>available.has(field)),assignments=columns.map(field=>`${field}=?`).join(",");
     await env.DB.prepare(`UPDATE customers SET ${assignments} WHERE id=?`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)]),id).run();
     return Response.json({ok:true,id});
   } catch(e){return Response.json({error:e.message},{status:500})}
