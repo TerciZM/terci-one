@@ -57,14 +57,16 @@
     document.querySelectorAll('[name="customer-type"]').forEach(r=>r.checked=(r.value===(customer?.customer_type||"Business")));
     for(const [id,key] of Object.entries(fields)){const el=$(id);if(el)el.value=customer?.[key]??(id==="customer-currency"?"ZMW":id==="customer-language"?"English":id==="customer-status"?"Active":id==="customer-payment-terms"?"Due on Receipt":id==="customer-portal"?"0":"")}
     if(customer?.display_name==null&&customer?.name)$("customer-name").value=customer.name;
+    if(customer){const display=customer.display_name||customer.name||"",company=customer.company_name||"",person=[customer.first_name,customer.last_name].filter(Boolean).join(" ");$("display-name-source").value=company&&display===company?"company":person&&display===person?"contact":"auto"}
     document.querySelectorAll("[data-customer-tab]").forEach((b,i)=>b.classList.toggle("active",i===0));document.querySelectorAll("[data-customer-panel]").forEach((p,i)=>p.classList.toggle("active",i===0));
     $("customer-form").classList.add("open");$("customer-salutation").focus();
   }
-  function syncDisplayName(){if(displayNameEdited)return;const company=$("customer-company").value.trim();const personal=[$("customer-first-name").value.trim(),$("customer-last-name").value.trim()].filter(Boolean).join(" ");$("customer-name").value=company||personal}
+  function syncDisplayName(){if(displayNameEdited)return;const company=$("customer-company").value.trim();const personal=[$("customer-first-name").value.trim(),$("customer-last-name").value.trim()].filter(Boolean).join(" ");const source=$("display-name-source").value;$("customer-name").value=source==="company"?company:source==="contact"?personal:company||personal}
   function closeForm(){ $("customer-form").classList.remove("open"); }
   function payload(){const body={};for(const [id,key] of Object.entries(fields)){const el=$(id);body[key]=el?el.value.trim():""}body.customer_type=selectedType();body.name=body.display_name;body.portal_enabled=Number(body.portal_enabled||0);body.opening_balance=Number(body.opening_balance||0);body.credit_limit=Number(body.credit_limit||0);return body}
   $("new-customer").onclick=()=>openForm();$("cancel-customer").onclick=closeForm;
   ["customer-company","customer-first-name","customer-last-name"].forEach(id=>$(id).addEventListener("input",syncDisplayName));
+  $("display-name-source").addEventListener("change",()=>{displayNameEdited=false;syncDisplayName()});
   $("customer-name").addEventListener("input",()=>{displayNameEdited=true});
   document.querySelectorAll('[data-close="customer-form"]').forEach(b=>b.onclick=closeForm);
   $("customer-form").addEventListener("click",e=>{if(e.target===$("customer-form"))closeForm()});
