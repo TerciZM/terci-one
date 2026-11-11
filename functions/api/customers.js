@@ -64,6 +64,7 @@ function clean(body) {
   return {
     ...body,
     name,
+    email: String(body.email || "").trim() || null,
     display_name: display || name,
     address: String(body.address || billing || "").trim() || null,
     status: body.status === "Inactive" ? "Inactive" : "Active",
@@ -103,6 +104,7 @@ export async function onRequestPost({ env, request }) {
   try {
     const body=clean(await request.json());body.customer_number=null;
     if(!body.name)return Response.json({error:"Display name, company name, or contact name is required"},{status:400});
+    if(body.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email))return Response.json({error:"Enter a valid email address containing @ and a domain"},{status:400});
     const available=await tableColumns(env,true),columns=editableFields.filter(field=>available.has(field)),placeholders=columns.map(()=>"?").join(",");
     const result=await env.DB.prepare(`INSERT INTO customers (${columns.join(",")}) VALUES (${placeholders})`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)])).run();
     const id=result.meta.last_row_id,customer_number=await assignCustomerNumber(env,id);
@@ -114,6 +116,7 @@ export async function onRequestPut({ env, request }) {
   try {
     const body=clean(await request.json()),id=Number(body.id);
     if(!id||!body.name)return Response.json({error:"Customer ID and display name are required"},{status:400});
+    if(body.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email))return Response.json({error:"Enter a valid email address containing @ and a domain"},{status:400});
     const available=await tableColumns(env,true),columns=editableFields.filter(field=>available.has(field)),assignments=columns.map(field=>`${field}=?`).join(",");
     await env.DB.prepare(`UPDATE customers SET ${assignments} WHERE id=?`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)]),id).run();
     return Response.json({ok:true,id});
