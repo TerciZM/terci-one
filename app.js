@@ -279,6 +279,8 @@ if (quoteNumber && !quoteNumber.value) {
 }
 render();
 const quoteId = new URLSearchParams(location.search).get("id");
+const presetCustomerId = new URLSearchParams(location.search).get("customer_id");
+if (presetCustomerId && ci) fetch(`/api/customers?id=${encodeURIComponent(presetCustomerId)}`).then(r=>r.ok?r.json():Promise.reject(Error("Could not load customer"))).then(c=>{selectedCustomer=c;ci.value=c.display_name||c.name||"";ci.disabled=true;ci.parentElement.parentElement.querySelector("small").textContent="Customer selected ✓"}).catch(e=>alert(e.message));
 if (quoteId && lines) {
   fetch(`/api/quotations?id=${encodeURIComponent(quoteId)}`)
     .then((r) => (r.ok ? r.json() : null))

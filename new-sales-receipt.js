@@ -38,5 +38,6 @@
     } catch (error) { alert(error.message); submit.disabled = false; submit.textContent = "Save receipt"; }
   };
   const today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); $("receipt-date").value = today.toISOString().slice(0, 10); updateReceiptNumber();
+  const presetCustomerId=new URLSearchParams(location.search).get("customer_id");if(presetCustomerId)get(`/api/customers?id=${encodeURIComponent(presetCustomerId)}`).then(record=>{customer=record;$("receipt-customer").value=record.display_name||record.name||"";$("receipt-customer-help").textContent="Customer selected ✓";return get(`/api/invoices?customer_id=${encodeURIComponent(record.id)}&outstanding=1`)}).then(openInvoices=>{invoices=openInvoices;paintInvoices();$("receipt-invoice-help").textContent=invoices.length?"Select an open invoice to apply this payment.":"No outstanding invoices. You can record an unallocated payment."}).catch(error=>alert(error.message));
 })();
 
