@@ -20,7 +20,30 @@ export async function onRequestPost({env,request}){
 }
 
 export async function onRequestPut({env,request}){
-  try{const body=clean(await request.json()),id=Number(body.id);if(!id||!body.name)return json({error:"Item ID and name are required"},400);const available=await columns(env),fields=editableFields.filter(field=>available.has(field)),assignments=fields.map(field=>`${field}=?`).join(",");await env.DB.prepare(`UPDATE items SET ${assignments} WHERE id=?`).bind(...fields.map(field=>dbValue(body,field)),id).run();return json({ok:true,id})}catch(e){return json({error:e.message},500)}
+  try {
+    const body = clean(await request.json());
+    const id = Number(body.id);
+    if (!id || !body.name) return json({error:"Item ID and name are required"},400);
+    const available = await columns(env);
+    const trackQuantity = typeof body.original_quantity === "number";
+    const changedQuantity = trackQuantity && body.original_quantity !== body.quantity;
+    const fields = editableFields.filter(field =>
+      available.has(field) && (field !== "quantity" || !trackQuantity || changedQuantity));
+    const assignments = fields.map(field => `${field}=?`).join(",");
+    const condition = changedQuantity ? " AND quantity=?" : "";
+    const args = [...fields.map(field => dbValue(body, field)), id];
+    if (changedQuantity) args.push(body.original_quantity);
+    const result = await env.DB.prepare(`UPDATE items SET ${assignments} WHERE id=?${condition}`).bind(...args).run();
+    if (changedQuantity && !result.meta.changes) {
+      return json({error:"Stock changed while this item was open. Reload it before adjusting stock."},409);
+    }
+    return json({ok:true,id});
+  } catch (error) {
+    if (error.message.includes("Stock cannot be set below the quantity reserved for jobs")) {
+      return json({error:"Stock cannot be set below the quantity reserved for jobs."},409);
+    }
+    return json({error:error.message},500);
+  }
 }
 
 export async function onRequestPatch({env,request}){
@@ -33,6 +56,9 @@ export async function onRequestDelete({env,request}){
     const tables=await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('quotation_lines','invoice_lines')").all(),names=new Set((tables.results||[]).map(row=>row.name));
     for(const id of ids){if(names.has("quotation_lines")){const linked=await env.DB.prepare("SELECT COUNT(*) count FROM quotation_lines WHERE item_id=?").bind(id).first();if(Number(linked?.count||0))return json({error:"One or more items are used on quotations. Mark them inactive instead."},409)}if(names.has("invoice_lines")){const linked=await env.DB.prepare("SELECT COUNT(*) count FROM invoice_lines WHERE item_id=?").bind(id).first();if(Number(linked?.count||0))return json({error:"One or more items are used on invoices. Mark them inactive instead."},409)}}
     await env.DB.batch(ids.map(id=>env.DB.prepare("DELETE FROM items WHERE id=?").bind(id)));return json({ok:true});
-  }catch(e){return json({error:e.message},500)}
+  }catch(e){
+    if(e.message.includes("FOREIGN KEY constraint failed"))return json({error:"One or more items are linked to business records. Mark them inactive instead."},409);
+    return json({error:e.message},500)
+  }
 }
 

@@ -1,5 +1,13 @@
 const sidebarShell = document.querySelector(".app-shell");
 const sidebarToggle = document.querySelector(".sidebar-toggle");
+
+const vendorsLink = document.querySelector('.sidebar a[href="vendors.html"]');
+if (vendorsLink && !vendorsLink.parentElement.querySelector('a[href="purchase-orders.html"]')) {
+  const purchasesLink = document.createElement("a");
+  purchasesLink.href = "purchase-orders.html";
+  purchasesLink.textContent = "Purchase Orders";
+  vendorsLink.after(purchasesLink);
+}
 document.querySelectorAll('a[href="#items"]').forEach((link) => {
   link.href = "items.html";
 });
