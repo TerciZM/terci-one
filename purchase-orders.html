@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Purchase Orders · Terci One</title>
+  <link rel="icon" href="terci-logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="purchase-orders.css">
+</head>
+<body class="purchase-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <button class="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">‹</button>
+      <div class="brand"><div class="brand-mark">T</div><div><strong>Terci One</strong><small>Business platform</small></div></div>
+      <nav>
+        <a href="index.html">Dashboard</a>
+        <details class="nav-section"><summary><span class="nav-section-icon">▣</span>Sales</summary>
+          <div class="nav-submenu">
+            <a href="customers.html">Customers</a><a href="quotation.html">Quotations</a><a href="invoices.html">Invoices</a>
+            <a href="sales-receipts.html">Sales Receipts</a><a href="recurring-invoices.html">Recurring Invoices</a>
+            <a href="payments-received.html">Payments Received</a><a href="credit-notes.html">Credit Notes</a>
+          </div>
+        </details>
+        <a href="items.html">Items &amp; Services</a>
+        <details class="nav-section" open><summary><span class="nav-section-icon">▣</span>Purchases</summary>
+          <div class="nav-submenu"><a href="vendors.html">Vendors</a><a class="active" href="purchase-orders.html">Purchase Orders</a><a href="expenses.html">Expenses</a></div>
+        </details>
+        <a href="reports.html">Reports</a>
+      </nav>
+      <div class="sidebar-footer"><a href="settings.html">⚙ &nbsp; Settings</a><small>Terci Communications Limited</small></div>
+    </aside>
+    <main class="main">
+      <header class="topbar customer-topbar"><div><span class="eyebrow">Purchases</span><h1 id="purchase-title">Purchase Orders</h1></div></header>
+      <div class="purchase-content">
+        <nav class="purchase-actions" aria-label="Purchasing">
+          <a class="button-link" href="purchase-orders.html">All Orders</a>
+          <a class="button-link" href="purchase-orders.html?view=stock">Stock &amp; Reordering</a>
+          <a class="button-link" href="purchase-orders.html?view=quotes">Supplier Quotes</a>
+          <a class="primary button-link" href="purchase-orders.html?new=1">＋ New Purchase Order</a>
+        </nav>
+        <p id="purchase-message" role="status" aria-live="polite">Loading…</p>
+        <div id="purchase-view"></div>
+      </div>
+    </main>
+  </div>
+  <script src="settings-preferences.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="purchase-orders.js"></script>
+</body>
+</html>

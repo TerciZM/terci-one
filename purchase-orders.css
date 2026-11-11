@@ -1,0 +1,36 @@
+.purchase-content { padding: clamp(12px, 3vw, 28px); }
+.purchase-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 16px; }
+.purchase-actions .primary { margin-inline-start: auto; }
+.purchase-page .main { min-width: 0; }
+.purchase-page .panel { padding: 16px; margin-bottom: 16px; }
+.purchase-page .customer-table { min-width: 650px; }
+.purchase-page .customer-table th, .purchase-page .customer-table td { padding: 10px 12px; }
+.purchase-page .form-grid label { min-width: 0; }
+.purchase-page .form-grid input, .purchase-page .form-grid select { width: 100%; }
+.purchase-page input[type="number"] { max-width: 110px; }
+.purchase-page .table-wrap { overflow-x: auto; margin-bottom: 12px; }
+.purchase-page .purchase-fields { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.purchase-page .purchase-fields label { display: grid; gap: 5px; }
+.purchase-page .purchase-entry { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.purchase-page .purchase-entry input { padding: 6px; }
+.purchase-page .purchase-entry button { margin: 0; }
+.purchase-page .purchase-meta { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+.purchase-page .purchase-meta dt { font-weight: 700; }
+.purchase-page .purchase-meta dd { margin: 3px 0 0; }
+.purchase-page .purchase-totals { text-align: right; }
+.purchase-page .purchase-print-brand { display: none; }
+#purchase-message:empty { display: none; }
+#purchase-message.error { color: #ba2738; }
+html[data-appearance="dark"] .purchase-page th { background: #20333b; color: #dce7ec; }
+@media (max-width: 640px) {
+  .purchase-actions .primary { margin-inline-start: 0; }
+}
+@media print {
+  .purchase-page .sidebar, .purchase-page .topbar, .purchase-actions, #purchase-message, .purchase-internal { display: none !important; }
+  .purchase-page .app-shell, .purchase-page .main { display: block; width: 100%; margin: 0; padding: 0; background: white; color: black; }
+  .purchase-content, .purchase-page .panel { padding: 0; border: 0; background: white; color: black; box-shadow: none; }
+  .purchase-page .purchase-print-brand { display: block; }
+  .purchase-page .customer-table { min-width: 0; }
+  .purchase-page .table-wrap { overflow: visible; }
+  .purchase-page tr { break-inside: avoid; }
+}

@@ -1,0 +1,15 @@
+.invoice-stock { margin-top: 18px; padding: clamp(14px, 3vw, 24px); scroll-margin-top: 18px; }
+.invoice-stock h2, .invoice-stock h3 { margin: 0 0 12px; }
+.invoice-stock .table-wrap { margin-bottom: 16px; }
+.invoice-stock .customer-table { min-width: 680px; }
+.invoice-stock .customer-table :is(th, td) { padding: 8px 10px; }
+.invoice-stock .customer-table td { vertical-align: top; }
+.invoice-stock-entry { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding-block: 6px; }
+.invoice-stock-entry label { display: grid; gap: 4px; font-size: 12px; }
+.invoice-stock-entry select, .invoice-stock-entry input { max-width: 215px; padding: 6px; }
+.invoice-stock-entry input[type="number"] { max-width: 80px; }
+.invoice-stock-entry button { margin: 0; }
+#invoice-stock-message:empty { display: none; }
+#invoice-stock-link[hidden], #invoice-stock[hidden] { display: none; }
+html[data-appearance="dark"] .invoice-stock th { background: #20333b; color: #dce7ec; }
+@media print { #invoice-stock, #invoice-stock-link { display: none !important; } }
