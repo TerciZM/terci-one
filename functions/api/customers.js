@@ -33,6 +33,27 @@ async function tableColumns(env,ensure=false) {
   return available;
 }
 
+async function assignCustomerNumber(env,id) {
+  // Key the public customer number to the database's monotonically increasing
+  // row ID. That keeps numbers sequential without a race-prone max()+1 counter.
+  let sequence=Number(id);
+  for(let attempt=0;attempt<1000;attempt++,sequence++){
+    const number=`CUS-${String(sequence).padStart(4,"0")}`;
+    const used=await env.DB.prepare("SELECT id FROM customers WHERE customer_number=? AND id<>? LIMIT 1").bind(number,id).first();
+    if(used)continue;
+    await env.DB.prepare("UPDATE customers SET customer_number=? WHERE id=? AND (customer_number IS NULL OR customer_number='')").bind(number,id).run();
+    const saved=await env.DB.prepare("SELECT customer_number FROM customers WHERE id=?").bind(id).first();
+    return saved?.customer_number||number;
+  }
+  throw new Error("Could not generate a unique customer number");
+}
+
+async function backfillCustomerNumbers(env,available){
+  if(!available.has("customer_number"))return;
+  const rows=await env.DB.prepare("SELECT id FROM customers WHERE customer_number IS NULL OR customer_number='' ORDER BY id").all();
+  for(const row of rows.results||[])await assignCustomerNumber(env,row.id);
+}
+
 function clean(body) {
   const salutation=String(body.salutation||"").trim()||null,firstName=String(body.first_name||"").trim()||null,lastName=String(body.last_name||"").trim()||null;
   const display = String(body.display_name || body.name || "").trim();
@@ -69,6 +90,7 @@ export async function onRequestGet({ env, request }) {
   try {
     const url=new URL(request.url),q=(url.searchParams.get("q")||"").trim(),id=Number(url.searchParams.get("id"));
     const available = await tableColumns(env), selected = [...new Set([...legacyFields,...editableFields])].filter(field => available.has(field));
+    if(!id)await backfillCustomerNumbers(env,available);
     const select = selected.join(","), searchable = ["name","company_name","email","phone","address","display_name","mobile","customer_number"].filter(field => available.has(field));
     if(id){const customer=await env.DB.prepare(`SELECT ${select} FROM customers WHERE id=?`).bind(id).first();return customer?Response.json(customer):Response.json({error:"Customer not found"},{status:404})}
     const sql=q?`SELECT ${select} FROM customers WHERE ${searchable.map(field=>`${field} LIKE ?`).join(" OR ")} ORDER BY name LIMIT 1000`:`SELECT ${select} FROM customers ORDER BY name LIMIT 1000`;
@@ -79,11 +101,12 @@ export async function onRequestGet({ env, request }) {
 
 export async function onRequestPost({ env, request }) {
   try {
-    const body=clean(await request.json());
+    const body=clean(await request.json());body.customer_number=null;
     if(!body.name)return Response.json({error:"Display name, company name, or contact name is required"},{status:400});
     const available=await tableColumns(env,true),columns=editableFields.filter(field=>available.has(field)),placeholders=columns.map(()=>"?").join(",");
     const result=await env.DB.prepare(`INSERT INTO customers (${columns.join(",")}) VALUES (${placeholders})`).bind(...columns.map(field=>valuesFor(body)[editableFields.indexOf(field)])).run();
-    return Response.json({id:result.meta.last_row_id},{status:201});
+    const id=result.meta.last_row_id,customer_number=await assignCustomerNumber(env,id);
+    return Response.json({id,customer_number},{status:201});
   } catch(e){return Response.json({error:e.message},{status:500})}
 }
 
