@@ -42,6 +42,9 @@ export async function onRequestPut({env,request}){
     if (error.message.includes("Stock cannot be set below the quantity reserved for jobs")) {
       return json({error:"Stock cannot be set below the quantity reserved for jobs."},409);
     }
+    if (error.message.includes("This item has invoice stock history and its type and unit are locked")) {
+      return json({error:"This item has invoice stock history and its type and unit are locked."},409);
+    }
     return json({error:error.message},500);
   }
 }

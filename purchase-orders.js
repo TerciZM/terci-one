@@ -280,14 +280,14 @@ async function showStock() {
   let items = await request(`${endpoint}?view=stock`);
   function render() {
     const term = search.value.trim().toLowerCase();
-    results.innerHTML = table(["Item", "On Hand", "Reserved", "Available", "On Order", "Preferred Vendor", "Reorder Level"],
+    results.innerHTML = table(["Item", "On Hand", "Reserved", "Available", "On Order", "Preferred Vendor", "Reorder Level", "Sales"],
       items.filter(item => (!filter.checked || item.reorder) &&
         [item.name, item.sku].some(value => (value || "").toLowerCase().includes(term)))
       .map(item => `<tr><td><a href="new-item.html?id=${item.id}">${esc(item.name)}</a>${item.sku ? `<br><small>${esc(item.sku)}</small>` : ""}</td>
       <td>${item.quantity} ${esc(item.unit)}</td><td>${item.reserved}</td><td>${item.available}</td><td>${item.on_order}</td>
       <td>${esc(item.preferred_supplier || "—")}</td>
       <td><form class="purchase-entry" data-item="${item.id}">${qtyInput(item.reorder_level ?? "", 1_000_000, 0)}
-      <button type="submit">Save</button>${item.reorder ? '<span class="customer-status">Reorder</span>' : ""}</form></td></tr>`).join(""),
+      <button type="submit">Save</button>${item.reorder ? '<span class="customer-status">Reorder</span>' : ""}</form></td><td><a href="?view=sales-history&amp;item=${item.id}">History</a></td></tr>`).join(""),
       "No matching stock items."
     );
   }
@@ -307,10 +307,26 @@ async function showStock() {
   render();
 }
 
+async function showSalesHistory() {
+  const itemId = Number(query.get("item"));
+  if (!Number.isSafeInteger(itemId) || itemId <= 0) throw new Error("Select an item first.");
+  const [item, history] = await Promise.all([
+    request(`/api/items?id=${itemId}`), request(`/api/invoice-stock?item=${itemId}`)
+  ]);
+  title.textContent = `Sales stock history · ${item.name}`;
+  view.innerHTML = `<section class="panel">${table(["Date", "Invoice", "Movement", "Quantity", "Reference"],
+    history.map(entry => `<tr><td>${esc(entry.created_at)}</td>
+      <td><a href="new-invoice.html?id=${entry.invoice_id}#invoice-stock">${esc(entry.invoice_number)}</a></td>
+      <td>${entry.prior_issue_id ? "Linked job issue" : esc(entry.kind)}</td>
+      <td>${entry.quantity}</td><td>${esc(entry.reference || "—")}</td></tr>`).join(""),
+    "No sales stock movements for this item.")}</section>`;
+}
+
 try {
   if (id) await showOrder();
   else if (query.has("new")) await newOrder();
   else if (query.get("view") === "stock") await showStock();
+  else if (query.get("view") === "sales-history") await showSalesHistory();
   else if (query.get("view") === "quotes") await showQuotes();
   else await listOrders();
   message();
