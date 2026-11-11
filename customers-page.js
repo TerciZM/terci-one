@@ -2,6 +2,7 @@
   const $ = id => document.getElementById(id);
   const state = { customers: [], search: "", view: "active", page: 1, size: 25, selected: new Set(), filters: {} };
   let displayNameEdited = false;
+  const africanCountries = ["Algeria","Angola","Benin","Botswana","Burkina Faso","Burundi","Cabo Verde","Cameroon","Central African Republic","Chad","Comoros","Democratic Republic of the Congo","Republic of the Congo","Côte d’Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","The Gambia","Ghana","Guinea","Guinea-Bissau","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Rwanda","São Tomé and Príncipe","Senegal","Seychelles","Sierra Leone","Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Western Sahara","Zambia","Zimbabwe"];
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
   const fields = {
     "customer-salutation":"salutation", "customer-first-name":"first_name", "customer-last-name":"last_name", "customer-company":"company_name",
@@ -18,6 +19,8 @@
   const selectedType = () => document.querySelector('[name="customer-type"]:checked')?.value || "Business";
   const displayName = c => c.display_name || c.name || [c.salutation, c.first_name, c.last_name].filter(Boolean).join(" ") || c.company_name || "Unnamed customer";
   const contactName = c => [c.salutation, c.first_name, c.last_name].filter(Boolean).join(" ");
+  function initCountrySelects(){for(const id of ["billing-country","shipping-country"]){const select=$(id);select.innerHTML='<option value="">Select an African country</option>'+africanCountries.map(country=>`<option value="${esc(country)}">${esc(country)}</option>`).join("")}}
+  function preserveCountryOption(id,value){const select=$(id);if(value&&!Array.from(select.options).some(option=>option.value===value)){const option=document.createElement("option");option.value=value;option.textContent=value;select.append(option)}}
 
   function matches(c) {
     const q = state.search.trim().toLowerCase();
@@ -55,8 +58,9 @@
   function openForm(customer=null){
     $("customer-editor").reset();displayNameEdited=Boolean(customer?.display_name||customer?.name);$("customer-id").value=customer?.id||"";$("form-title").textContent=customer?"Edit customer":"New customer";
     document.querySelectorAll('[name="customer-type"]').forEach(r=>r.checked=(r.value===(customer?.customer_type||"Business")));
-    for(const [id,key] of Object.entries(fields)){const el=$(id);if(el)el.value=customer?.[key]??(id==="customer-currency"?"ZMW":id==="customer-language"?"English":id==="customer-status"?"Active":id==="customer-payment-terms"?"Due on Receipt":id==="customer-portal"?"0":"")}
+    for(const [id,key] of Object.entries(fields)){const el=$(id);if(el){const value=customer?.[key]??(id==="customer-currency"?"ZMW":id==="customer-language"?"English":id==="customer-status"?"Active":id==="customer-payment-terms"?"Due on Receipt":id==="customer-portal"?"0":"");if(id==="billing-country"||id==="shipping-country")preserveCountryOption(id,value);el.value=value}}
     if(customer?.display_name==null&&customer?.name)$("customer-name").value=customer.name;
+    for(const id of ["billing-country","shipping-country"])$(id.replace("country","state")).setAttribute("list",$(id).value==="Zambia"?"zambia-provinces":"");
     if(customer){const display=customer.display_name||customer.name||"",company=customer.company_name||"",person=[customer.first_name,customer.last_name].filter(Boolean).join(" ");$("display-name-source").value=company&&display===company?"company":person&&display===person?"contact":"auto"}
     document.querySelectorAll("[data-customer-tab]").forEach((b,i)=>b.classList.toggle("active",i===0));document.querySelectorAll("[data-customer-panel]").forEach((p,i)=>p.classList.toggle("active",i===0));
     $("customer-form").classList.add("open");$("customer-salutation").focus();
@@ -64,17 +68,19 @@
   function syncDisplayName(){if(displayNameEdited)return;const company=$("customer-company").value.trim();const personal=[$("customer-first-name").value.trim(),$("customer-last-name").value.trim()].filter(Boolean).join(" ");const source=$("display-name-source").value;$("customer-name").value=source==="company"?company:source==="contact"?personal:company||personal}
   function closeForm(){ $("customer-form").classList.remove("open"); }
   function payload(){const body={};for(const [id,key] of Object.entries(fields)){const el=$(id);body[key]=el?el.value.trim():""}body.customer_type=selectedType();body.name=body.display_name;body.portal_enabled=Number(body.portal_enabled||0);body.opening_balance=Number(body.opening_balance||0);body.credit_limit=Number(body.credit_limit||0);return body}
+  function validEmail(value){return !value||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)}
   $("new-customer").onclick=()=>openForm();$("cancel-customer").onclick=closeForm;
   ["customer-company","customer-first-name","customer-last-name"].forEach(id=>$(id).addEventListener("input",syncDisplayName));
   $("display-name-source").addEventListener("change",()=>{displayNameEdited=false;syncDisplayName()});
   $("customer-name").addEventListener("input",()=>{displayNameEdited=true});
   document.querySelectorAll('[data-close="customer-form"]').forEach(b=>b.onclick=closeForm);
   $("customer-form").addEventListener("click",e=>{if(e.target===$("customer-form"))closeForm()});
-  $("customer-editor").addEventListener("submit",async e=>{e.preventDefault();const id=$("customer-id").value,body=payload();if(!body.display_name){const generated=[body.salutation,body.first_name,body.last_name].filter(Boolean).join(" ");body.display_name=generated||body.company_name;if(!body.display_name){alert("Enter a display name, company name, or contact name.");return}$("customer-name").value=body.display_name;body.name=body.display_name}
+  $("customer-editor").addEventListener("submit",async e=>{e.preventDefault();const id=$("customer-id").value,body=payload();if(!validEmail(body.email)){alert("Enter a valid email address, including @ and a domain.");$("customer-email").focus();return}if(!body.display_name){const generated=[body.salutation,body.first_name,body.last_name].filter(Boolean).join(" ");body.display_name=generated||body.company_name;if(!body.display_name){alert("Enter a display name, company name, or contact name.");return}$("customer-name").value=body.display_name;body.name=body.display_name}
     const button=e.submitter;button.disabled=true;button.textContent="Saving…";try{await api("/api/customers",{method:id?"PUT":"POST",headers:{"content-type":"application/json"},body:JSON.stringify(id?{...body,id}:body)});closeForm();state.selected.clear();await load()}catch(error){alert(error.message)}finally{button.disabled=false;button.textContent="Save customer"}
   });
   document.querySelectorAll("[data-customer-tab]").forEach(button=>button.onclick=()=>{document.querySelectorAll("[data-customer-tab]").forEach(b=>b.classList.toggle("active",b===button));document.querySelectorAll("[data-customer-panel]").forEach(panel=>panel.classList.toggle("active",panel.dataset.customerPanel===button.dataset.customerTab))});
   $("same-as-billing").onchange=e=>{if(!e.target.checked)return;for(const suffix of ["attention","country","address1","address2","city","state","zip","phone","fax"]){$("shipping-"+suffix).value=$("billing-"+suffix).value}};
+  ["billing-country","shipping-country"].forEach(id=>$(id).addEventListener("change",()=>{$(id.replace("country","state")).setAttribute("list",$(id).value==="Zambia"?"zambia-provinces":"")}));
   $("customer-filter").oninput=e=>{state.search=e.target.value;state.page=1;draw()};$("page-size").onchange=e=>{state.size=Number(e.target.value);state.page=1;draw()};$("prev-page").onclick=()=>{state.page--;draw()};$("next-page").onclick=()=>{state.page++;draw()};
   $("view-toggle").onclick=()=>$("customer-view").classList.toggle("open");$("view-search").oninput=e=>document.querySelectorAll("[data-view]").forEach(b=>b.hidden=!b.textContent.toLowerCase().includes(e.target.value.toLowerCase()));
   document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{state.view=b.dataset.view;state.page=1;state.selected.clear();$("view-label").textContent=b.textContent;document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("selected",x===b));$("customer-view").classList.remove("open");draw()});
@@ -91,5 +97,6 @@
   $("associate-template").onclick=()=>{const value=prompt("Template name to assign:");if(value===null)return;api("/api/customers",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"template",value,ids:[...state.selected]})}).then(()=>{state.selected.clear();load()}).catch(error=>alert(error.message))};
   $("bulk-delete").onclick=async()=>{if(!confirm(`Delete ${state.selected.size} selected customer(s)?`))return;try{await api(`/api/customers?ids=${[...state.selected].join(",")}`,{method:"DELETE"});state.selected.clear();await load()}catch(error){alert(error.message)}};
   $("merge-customers").onclick=()=>alert("To merge customers, select the primary customer first in the merge workflow. This action is not available yet.");
+  initCountrySelects();
   load();
 })();
